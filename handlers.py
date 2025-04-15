@@ -81,8 +81,6 @@ async def chat_handler(message: types.Message):
         except Exception as e:
             await message.answer(f"Ошибка при получении данных: {e}")
 
-
-
     if await get_user_field(user_id, "menu") == 311:
         tale_num = await get_tale_num(user_id, 8, 0, "0")
         await add_small_tale_if_not(tale_num)

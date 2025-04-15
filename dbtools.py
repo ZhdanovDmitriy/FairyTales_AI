@@ -83,20 +83,20 @@ async def update_user_field(user_id: int, field: str, value):
         await cursor.execute(query, (value, user_id))
     conn.close()
 
-async def update_tale_field(user_id: int, field_name: str, new_value: Any) -> bool:
+async def update_tale_field(tale_num: int, field_name: str, new_value: Any) -> bool:
     """
-    Обновляет значение поля field_name для пользователя с данным user_id в таблице tales.
+    Обновляет значение поля field_name для записи с данным tale_num в таблице tales.
     Возвращает True, если обновление прошло успешно, и False в случае ошибки.
     """
     allowed_fields = {"tale_size", "cur_stage", "genre"}
     if field_name not in allowed_fields:
         raise ValueError(f"Запрос поля {field_name} запрещён")
-    
-    sql = f"UPDATE tales SET {field_name} = %s WHERE user_id = %s;"
+
+    sql = f"UPDATE tales SET {field_name} = %s WHERE tale_num = %s;"
     conn = await get_async_connection()
     try:
         async with conn.cursor() as cursor:
-            await cursor.execute(sql, (new_value, user_id))
+            await cursor.execute(sql, (new_value, tale_num))
             return cursor.rowcount > 0
     except Exception as e:
         print(f"Ошибка при обновлении: {e}")

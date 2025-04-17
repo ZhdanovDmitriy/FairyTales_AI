@@ -25,13 +25,13 @@ async def get_user_field(user_id: int, field_name: str) -> Optional[Any]:
 
 async def get_tale_field(tale_num: int, field_name: str) -> Optional[Any]:
     """
-    Возвращает значение поля field_name для пользователя с данным tale_num в таблице tales.
-    Если пользователя нет или поле имеет значение NULL — возвращает None.
+    Возвращает значение поля field_name для записи с данным tale_num в таблице tales.
+    Если записи нет или поле имеет значение NULL — возвращает None.
     """
-    allowed_fields = {"tale_size", "cur_stage", "genre"}
+    allowed_fields = {"tale_size", "cur_stage", "genre", "hero", "moral"}
     if field_name not in allowed_fields:
         raise ValueError(f"Запрос поля {field_name} запрещён")
-    
+
     sql = f"SELECT {field_name} FROM tales WHERE tale_num = %s;"
     conn = await get_async_connection()
     try:
@@ -86,11 +86,12 @@ async def update_user_field(user_id: int, field: str, value):
 async def update_tale_field(tale_num: int, field_name: str, new_value: Any) -> bool:
     """
     Обновляет значение поля field_name для записи с данным tale_num в таблице tales.
-    Возвращает True, если обновление прошло успешно, и False в случае ошибки.
+    Возвращает True, если обновление прошло успешно (затронута хотя бы одна строка),
+    и False в случае ошибки или если запись не найдена.
     """
-    allowed_fields = {"tale_size", "cur_stage", "genre"}
+    allowed_fields = {"tale_size", "cur_stage", "genre", "hero", "moral"}
     if field_name not in allowed_fields:
-        raise ValueError(f"Запрос поля {field_name} запрещён")
+        raise ValueError(f"Обновление поля {field_name} запрещено")
 
     sql = f"UPDATE tales SET {field_name} = %s WHERE tale_num = %s;"
     conn = await get_async_connection()
@@ -99,10 +100,13 @@ async def update_tale_field(tale_num: int, field_name: str, new_value: Any) -> b
             await cursor.execute(sql, (new_value, tale_num))
             return cursor.rowcount > 0
     except Exception as e:
-        print(f"Ошибка при обновлении: {e}")
+        print(f"Ошибка при обновлении tales.{field_name}: {e}")
         return False
     finally:
-        conn.close()
+        try:
+            conn.close()
+        except:
+            pass
 
 async def user_exists(user_id: int) -> bool:
     conn = await get_async_connection()
@@ -112,40 +116,53 @@ async def user_exists(user_id: int) -> bool:
     conn.close()
     return result is not None
 
-async def get_tale_num(user_id: int, tale_size: int, cur_stage: int, genre: str):
+async def get_tale_num(
+    user_id: int,
+    tale_size: int,
+    cur_stage: int,
+    genre: str,
+    hero: Optional[str] = None,
+    moral: Optional[str] = None
+) -> int:
     """
-    Создаёт новую сказку для пользователя, только если у него нет незаконченных сказок.
-    Незаконченная сказка — это запись, у которой cur_stage < tale_size.
-    Если такая сказка существует, возвращает её ID.
+    Создаёт новую сказку для пользователя, только если у него нет незаконченных.
+    Если есть незаконченная (cur_stage < tale_size), возвращает её tale_num.
+    Иначе — создаёт новую запись с user_id, tale_size, cur_stage, genre, hero, moral.
     """
     conn = await get_async_connection()
     try:
         async with conn.cursor() as cursor:
+            # ищем незаконченные
             await cursor.execute(
                 """
                 SELECT tale_num
-                FROM tales
-                WHERE user_id = %s
-                  AND cur_stage < tale_size
-                LIMIT 1
+                  FROM tales
+                 WHERE user_id = %s
+                   AND cur_stage < tale_size
+                 LIMIT 1
                 """,
                 (user_id,)
             )
-            unfinished = await cursor.fetchone()
-            if unfinished:
-                return unfinished[0]
+            row = await cursor.fetchone()
+            if row:
+                return row[0]
+
+            # создаём новую
             await cursor.execute(
                 """
-                INSERT INTO tales (user_id, tale_size, cur_stage, genre)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO tales (user_id, tale_size, cur_stage, genre, hero, moral)
+                     VALUES (%s,        %s,        %s,        %s,    %s,   %s)
                 """,
-                (user_id, tale_size, cur_stage, genre)
+                (user_id, tale_size, cur_stage, genre, hero, moral)
             )
             await cursor.execute("SELECT LAST_INSERT_ID()")
-            result = await cursor.fetchone()
-            return result[0]
+            new_id = (await cursor.fetchone())[0]
+            return new_id
     finally:
-        conn.close()
+        try:
+            conn.close()
+        except:
+            pass
 
 async def check_all_users():
     conn = await get_async_connection()
@@ -159,7 +176,7 @@ async def check_all_users():
 async def add_small_tale_if_not(tale_num: int):
     conn = await get_async_connection()
     if not conn:
-        print("🛑 Ошибка: Соединение не установлено")
+        print("❌ Ошибка: Соединение не установлено")
         return
 
     try:
@@ -170,12 +187,12 @@ async def add_small_tale_if_not(tale_num: int):
                 try:
                     await cursor.execute("INSERT INTO small_tale (tale_num) VALUES (%s)", (tale_num,))
                     await conn.commit()
-                    print(f"Запись с tale_num={tale_num} успешно создана.")
+                    print(f"✅Запись с tale_num={tale_num} успешно создана.")
                 except Exception as insert_error:
                     print(f"🔥 Ошибка при вставке данных: {insert_error}")
                     await conn.rollback()
     except Exception as e:
-        print(f"🔥 Критическая ошибка: {e}")
+        print(f"❌ Критическая ошибка: {e}")
         raise
     finally:
         if conn and not conn.closed:
@@ -185,7 +202,7 @@ async def add_small_tale_if_not(tale_num: int):
 async def add_data_to_small_tale(tale_num: int, text: str):
     conn = await get_async_connection()
     if not conn:
-        print("🛑 Не удалось подключиться к БД")
+        print("❌ Не удалось подключиться к БД")
         return
 
     try:

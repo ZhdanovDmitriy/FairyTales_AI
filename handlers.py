@@ -87,13 +87,15 @@ async def chat_handler(message: types.Message):
         stage = await get_tale_field(tale_num, 'cur_stage') + 1
         if(stage == 1):
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id-1)
+        print(f"stage = {stage}")
         await update_tale_field(tale_num, 'cur_stage', stage)
         text = message.text
         name = await get_user_field(user_id, "name") or "не указано"
         sex = await get_user_field(user_id, "sex") or "не указано"
         age = await get_user_field(user_id, "age") or "не указано"
         hobby = await get_user_field(user_id, "hobby") or "не указано"
-        prompt = await get_prompt(text, name, sex, age, hobby, stage);
+        prompt = await get_prompt(text, name, sex, age, hobby, await get_tale_field(tale_num, 'genre'), stage, await get_tale_field(tale_num, 'tale_size'));
+        print(f"prompt = {prompt}")
         await add_data_to_small_tale(tale_num, prompt)
         context = await get_user_context_small_tale(tale_num)
         placeholder = await message.answer("Подождите, придумываю сказку...")

@@ -2,11 +2,9 @@ import asyncio
 from config import bot, dp
 from dbtools import fetch_current_db, check_all_users, print_table
 from handlers import chat_handler
-from callbacks import process_tale, process_settings, process_back
+from callbacks import process_tale
 
 async def main():
-    # await fetch_current_db()
-    # await check_all_users()
     await print_table("users")
     await print_table("tales")
     await print_table("small_tale")

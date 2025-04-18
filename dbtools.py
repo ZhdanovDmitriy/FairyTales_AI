@@ -3,11 +3,7 @@ from typing import Any, Optional
 import asyncio
 
 async def get_user_field(user_id: int, field_name: str) -> Optional[Any]:
-    """
-    Возвращает значение поля field_name для пользователя с данным user_id.
-    Если пользователя нет или поле имеет значение NULL — возвращает None.
-    """
-    allowed_fields = {"sex", "age", "hobby", "menu", "name", "last_message "}
+    allowed_fields = {"sex", "age", "hobby", "menu", "name", "last_message", "cur_tale"}
     if field_name not in allowed_fields:
         raise ValueError(f"Запрос поля {field_name} запрещён")
     sql = f"SELECT {field_name} FROM users WHERE user_id = %s;"
@@ -23,7 +19,7 @@ async def get_user_field(user_id: int, field_name: str) -> Optional[Any]:
         except:
             pass
 
-async def get_tale_field(tale_num: int, field_name: str) -> Optional[Any]:
+async def get_tales_field(tale_num: int, field_name: str) -> Optional[Any]:
     """
     Возвращает значение поля field_name для записи с данным tale_num в таблице tales.
     Если записи нет или поле имеет значение NULL — возвращает None.
@@ -62,18 +58,19 @@ async def fetch_current_db():
         if conn:
             conn.close()
 
-async def add_user(user_id: int, sex: str, age: int, hobby: str, menu: int, name: str, last_message: int):
+async def add_user(user_id: int, sex: str, age: int, hobby: str, menu: int, name: str, last_message: int, cur_tale: int = 0):
     conn = await get_async_connection()
     async with conn.cursor() as cursor:
         await cursor.execute("""
-            INSERT INTO users (user_id, sex, age, hobby, menu, name, last_message)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE sex=%s, age=%s, hobby=%s, menu=%s, name=%s, last_message=%s
-        """, (user_id, sex, age, hobby, menu, name, last_message, sex, age, hobby, menu, name, last_message))
+            INSERT INTO users (user_id, sex, age, hobby, menu, name, last_message, cur_tale)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE sex=%s, age=%s, hobby=%s, menu=%s, name=%s, last_message=%s, cur_tale=%s
+        """, (user_id, sex, age, hobby, menu, name, last_message, cur_tale,
+              sex, age, hobby, menu, name, last_message, cur_tale))
     conn.close()
 
 async def update_user_field(user_id: int, field: str, value):
-    allowed_fields = {'sex', 'age', 'hobby', 'menu', 'name', 'last_message'}
+    allowed_fields = {'sex', 'age', 'hobby', 'menu', 'name', 'last_message', 'cur_tale'}
     if field not in allowed_fields:
         raise ValueError(f"Field '{field}' is not allowed to be updated.")
 
@@ -81,9 +78,10 @@ async def update_user_field(user_id: int, field: str, value):
     async with conn.cursor() as cursor:
         query = f"UPDATE users SET {field} = %s WHERE user_id = %s"
         await cursor.execute(query, (value, user_id))
+        print(f"✅Поле {field} успешно обновлены в user")
     conn.close()
 
-async def update_tale_field(tale_num: int, field_name: str, new_value: Any) -> bool:
+async def update_tales_field(tale_num: int, field_name: str, new_value: Any) -> bool:
     """
     Обновляет значение поля field_name для записи с данным tale_num в таблице tales.
     Возвращает True, если обновление прошло успешно (затронута хотя бы одна строка),
@@ -116,53 +114,78 @@ async def user_exists(user_id: int) -> bool:
     conn.close()
     return result is not None
 
-async def get_tale_num(
-    user_id: int,
-    tale_size: int,
-    cur_stage: int,
-    genre: str,
-    hero: Optional[str] = None,
-    moral: Optional[str] = None
-) -> int:
+async def get_tales_num(user_id: int) -> Optional[int]:
     """
-    Создаёт новую сказку для пользователя, только если у него нет незаконченных.
-    Если есть незаконченная (cur_stage < tale_size), возвращает её tale_num.
-    Иначе — создаёт новую запись с user_id, tale_size, cur_stage, genre, hero, moral.
+    Возвращает tale_num незавершённой сказки пользователя (где cur_stage != tale_size).
+    Если таких записей нет — возвращает None.
     """
     conn = await get_async_connection()
     try:
         async with conn.cursor() as cursor:
-            # ищем незаконченные
             await cursor.execute(
                 """
                 SELECT tale_num
                   FROM tales
                  WHERE user_id = %s
+                   AND cur_stage IS NOT NULL
+                   AND tale_size IS NOT NULL
                    AND cur_stage < tale_size
                  LIMIT 1
                 """,
                 (user_id,)
             )
-            row = await cursor.fetchone()
-            if row:
-                return row[0]
+            result = await cursor.fetchone()
+            return result[0] if result else None
+    except Exception as e:
+        print(f"🚨 Ошибка при получении незавершённой сказки: {e}")
+        return None
+    finally:
+        try:
+            conn.close()
+        except:
+            pass
 
-            # создаём новую
+
+async def get_new_tales_num(user_id: int) -> int:
+    """
+    Завершает все предыдущие сказки пользователя и создаёт новую запись в таблице tales.
+    Все поля, кроме user_id, заполняются NULL.
+    Возвращает tale_num новой записи.
+    """
+    conn = await get_async_connection()
+    try:
+        async with conn.cursor() as cursor:
+            # Завершаем все предыдущие незаконченные сказки пользователя
+            await cursor.execute(
+                """
+                UPDATE tales
+                   SET cur_stage = tale_size
+                 WHERE user_id = %s
+                """,
+                (user_id,)
+            )
+            # Фиксируем изменения (если автокоммит отключен)
+            await conn.commit()
+
+            # Создаём новую запись со всеми полями, кроме user_id, равными NULL
             await cursor.execute(
                 """
                 INSERT INTO tales (user_id, tale_size, cur_stage, genre, hero, moral)
-                     VALUES (%s,        %s,        %s,        %s,    %s,   %s)
+                     VALUES (%s,       %s,        %s,        %s,    %s,   %s)
                 """,
-                (user_id, tale_size, cur_stage, genre, hero, moral)
+                (user_id, None, None, None, None, None)
             )
+            # Получаем идентификатор только что созданной записи
             await cursor.execute("SELECT LAST_INSERT_ID()")
             new_id = (await cursor.fetchone())[0]
+            await conn.commit()
             return new_id
     finally:
         try:
             conn.close()
         except:
             pass
+
 
 async def check_all_users():
     conn = await get_async_connection()
@@ -173,33 +196,74 @@ async def check_all_users():
             print(row)
     conn.close()
 
-async def add_small_tale_if_not(tale_num: int):
+async def add_tale_if_not(tale_num: int, tale_size: int):
+    # Сопоставляем размер сказки с именем таблицы
+    table_map = {
+        8: "small_tale",
+        16: "medium_tale",
+        32: "large_tale",
+    }
+
+    table_name = table_map.get(tale_size)
+    if not table_name:
+        print(f"❌ Недопустимый размер сказки: {tale_size!r}. Ожидаются 8, 16 или 32.")
+        return
+
     conn = await get_async_connection()
     if not conn:
-        print("❌ Ошибка: Соединение не установлено")
+        print("❌ Ошибка: соединение не установлено")
         return
 
     try:
         async with conn.cursor() as cursor:
-            await cursor.execute("SELECT tale_num FROM small_tale WHERE tale_num = %s", (tale_num,))
-            if not await cursor.fetchone():
-                print(f"Создаем запись для tale_num={tale_num}")
+            # Проверка наличия записи
+            await cursor.execute(
+                f"SELECT tale_num FROM {table_name} WHERE tale_num = %s",
+                (tale_num,),
+            )
+            exists = await cursor.fetchone()
+
+            if not exists:
+                print(f"Создаем запись в {table_name} для tale_num={tale_num}")
                 try:
-                    await cursor.execute("INSERT INTO small_tale (tale_num) VALUES (%s)", (tale_num,))
+                    # Вставляем только tale_num — все остальные поля автоматически NULL
+                    await cursor.execute(
+                        f"INSERT INTO {table_name} (tale_num) VALUES (%s)",
+                        (tale_num,),
+                    )
                     await conn.commit()
-                    print(f"✅Запись с tale_num={tale_num} успешно создана.")
+                    print(f"✅ Запись с tale_num={tale_num} успешно создана в {table_name}.")
                 except Exception as insert_error:
-                    print(f"🔥 Ошибка при вставке данных: {insert_error}")
+                    print(f"🔥 Ошибка при вставке в {table_name}: {insert_error}")
                     await conn.rollback()
+            else:
+                print(f"ℹ️ Запись с tale_num={tale_num} уже есть в {table_name}.")
     except Exception as e:
         print(f"❌ Критическая ошибка: {e}")
         raise
     finally:
         if conn and not conn.closed:
             conn.close()
-            print(f"Соединение для tale_num={tale_num} закрыто")
+            print("🔒 Соединение закрыто")
 
-async def add_data_to_small_tale(tale_num: int, text: str):
+
+
+async def add_data_to_tale(tale_num: int, prompt: str, tale_size: int):
+    table_map = {
+        8: ("small_tale", 8),
+        16: ("medium_tale", 16),
+        32: ("large_tale", 32),
+    }
+
+    if tale_size not in table_map:
+        print(f"❌ Неверный размер сказки: {tale_size}")
+        return
+
+    table_name, num_pairs = table_map[tale_size]
+
+    # Генерация всех полей p0, ans0, p1, ans1, ...
+    fields = [f"p{i}" if j % 2 == 0 else f"ans{i}" for i in range(num_pairs) for j in range(2)]
+
     conn = await get_async_connection()
     if not conn:
         print("❌ Не удалось подключиться к БД")
@@ -207,68 +271,73 @@ async def add_data_to_small_tale(tale_num: int, text: str):
 
     try:
         async with conn.cursor() as cursor:
-            # Берём всю строку
-            await cursor.execute("SELECT * FROM small_tale WHERE tale_num = %s", (tale_num,))
-            result = await cursor.fetchone()
-            if not result:
-                print(f"⚠ Запись {tale_num} не найдена")
+            await cursor.execute(f"SELECT * FROM {table_name} WHERE tale_num = %s", (tale_num,))
+            row = await cursor.fetchone()
+
+            if not row:
+                print(f"⚠ Запись с tale_num={tale_num} не найдена в {table_name}")
                 return
 
-            # Поля, которые заполняем по очереди
-            fields = [
-                'p0', 'ans0', 'p1', 'ans1', 'p2', 'ans2',
-                'p3', 'ans3', 'p4', 'ans4', 'p5', 'ans5',
-                'p6', 'ans6', 'p7', 'ans7'
-            ]
-
-            # Найдём первое пустое поле и запишем в него
-            updated = False
+            # row[0] — это tale_num, дальше идут p0, ans0, ...
             for idx, field in enumerate(fields, start=1):
-                if result[idx] is None:
+                if row[idx] is None:
                     await cursor.execute(
-                        f"UPDATE small_tale SET {field} = %s WHERE tale_num = %s",
-                        (text, tale_num)
+                        f"UPDATE {table_name} SET {field} = %s WHERE tale_num = %s",
+                        (prompt, tale_num)
                     )
-                    updated = True
-                    print(f"✅ Данные записаны в {field}")
-                    break
+                    await conn.commit()
+                    print(f"✅ Данные записаны в {field} таблицы {table_name}")
+                    return
 
-            if updated:
-                await conn.commit()
-                print("✅ Изменения сохранены в базе данных.")
-            else:
-                print("ℹ Все поля уже заполнены")
+            print(f"ℹ Все поля в {table_name} уже заполнены")
     except Exception as e:
-        print(f"🚨 Ошибка записи: {e}")
+        print(f"🚨 Ошибка при записи данных: {e}")
     finally:
         if conn and not conn.closed:
             conn.close()
 
+async def get_user_context_tale(tale_num: int, tale_size: int):
+    table_map = {
+        8: ("small_tale", 8),
+        16: ("medium_tale", 16),
+        32: ("large_tale", 32),
+    }
 
-async def get_user_context_small_tale(tale_num: int):
+    if tale_size not in table_map:
+        print(f"❌ Неверный размер сказки: {tale_size}")
+        return []
+
+    table_name, num_pairs = table_map[tale_size]
+    fields = [f"p{i}" if j % 2 == 0 else f"ans{i}" for i in range(num_pairs) for j in range(2)]
+
     conn = await get_async_connection()
     context = []
+
+    if not conn:
+        print("❌ Не удалось подключиться к БД")
+        return []
+
     try:
         async with conn.cursor() as cursor:
-            await cursor.execute("SELECT * FROM small_tale WHERE tale_num = %s", (tale_num,))
+            await cursor.execute(f"SELECT * FROM {table_name} WHERE tale_num = %s", (tale_num,))
             result = await cursor.fetchone()
             if not result:
-                print(f"Record with tale_num {tale_num} does not exist.")
+                print(f"⚠ Запись с tale_num={tale_num} не найдена в {table_name}")
                 return []
-            fields = [
-                'p0', 'ans0', 'p1', 'ans1', 'p2', 'ans2',
-                'p3', 'ans3', 'p4', 'ans4', 'p5', 'ans5',
-                'p6', 'ans6', 'p7', 'ans7'
-            ]
+
             for i, field in enumerate(fields):
-                cell = result[i+1]
+                cell = result[i + 1]  # result[0] — это tale_num
                 if cell is not None:
                     role = "user" if i % 2 == 0 else "assistant"
                     context.append({"role": role, "content": cell})
+    except Exception as e:
+        print(f"🚨 Ошибка получения контекста: {e}")
     finally:
-        conn.close()
+        if conn and not conn.closed:
+            conn.close()
 
     return context
+
 
 async def print_table(table_name: str):
     conn = await get_async_connection()

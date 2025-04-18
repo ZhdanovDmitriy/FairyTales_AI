@@ -1,117 +1,33 @@
 from aiogram.types import CallbackQuery
-from keyboards import start_keyboard, settings_keyboard, back_keyboard, sex_keyboard, genre_keyboard
 from dbtools import get_user_field, update_user_field
 from config import START_MESSAGE, dp, bot
+from menu import get_new_menu_lvl, get_menu_text, get_menu_keyboard, button_hendler
+from dbtools import fetch_current_db, check_all_users, print_table, get_tales_field, get_user_field 
 
-@dp.callback_query(lambda query: query.data == "tale")
+@dp.callback_query()
 async def process_tale(callback: CallbackQuery):
-    await callback.message.delete()
-    await callback.message.answer("Выбери, в каком жанре ты бы хотел сказку:", reply_markup=genre_keyboard)
-    await update_user_field(callback.from_user.id, 'menu', 21)
+    await print_table("users")
+    await print_table("tales")
+    await print_table("small_tale")
+    button_text = callback.data
 
-@dp.callback_query(lambda query: query.data == "small_tale")
-async def process_tale(callback: CallbackQuery):
-    await callback.message.delete()
-    await callback.message.answer("Кто будет главным героем сказки?", reply_markup=back_keyboard)
-    await update_user_field(callback.from_user.id, 'menu', 311)
+    if(button_text == "continue tale"):
+        await callback.answer("В разработке")
+        
+    print(f"button_text : {button_text}")
+    cur_stage = await get_tales_field(await get_user_field(callback.from_user.id, "cur_tale"), "cur_stage") or 0
+    tale_size = await get_tales_field(await get_user_field(callback.from_user.id, "cur_tale"), "tale_size") or 0
+    menu_lvl = await get_new_menu_lvl(button_text, cur_stage, tale_size)
+    button_hendler_text = await button_hendler(callback.from_user.id, button_text);
+    print(f"menu_lvl : {menu_lvl}")
+    await update_user_field(callback.from_user.id, 'menu', menu_lvl)
 
-@dp.callback_query(lambda query: query.data == "medium_tale")
-async def process_tale(callback: CallbackQuery):
-    await callback.answer("Данный жанр пока в разработке")
-
-@dp.callback_query(lambda query: query.data == "large_tale")
-async def process_tale(callback: CallbackQuery):
-    await callback.answer("Данный жанр пока в разработке")
-
-@dp.callback_query(lambda query: query.data == "settings")
-async def process_settings(callback: CallbackQuery):
-    await callback.message.delete()
+    if(button_text != "I dont know tale" and button_text != "back main from tale"):
+        await callback.message.delete()
     try:
-        name = await get_user_field(callback.from_user.id, "name")
-        sex = await get_user_field(callback.from_user.id, "sex")
-        age = await get_user_field(callback.from_user.id, "age") or "не указано"
-        hobby = await get_user_field(callback.from_user.id, "hobby") or "не указано"
-
         await callback.message.answer(
-            f"Имя: {name}\nПол: {sex}\nВозраст: {age}\nХобби: {hobby}\n\nВыберите, что хотите изменить.",
-            reply_markup=settings_keyboard
+            button_hendler_text + await get_menu_text(lvl = menu_lvl, user_id=callback.from_user.id, message=None, tale_size=None),
+            reply_markup=await get_menu_keyboard(menu_lvl)
         )
-        await update_user_field(callback.from_user.id, 'menu', 22)
-
-    except Exception as e:
-        await callback.answer(f"Ошибка при получении данных: {e}")
-
-
-@dp.callback_query(lambda query: query.data == "back")
-async def process_back(callback: CallbackQuery):
-    await callback.message.delete()
-    if(await get_user_field(callback.from_user.id, "menu") in {314, 321, 22, 21, 311}):
-        await callback.message.answer(START_MESSAGE, reply_markup=start_keyboard)
-        await update_user_field(callback.from_user.id, 'menu', 321)
-    if(await get_user_field(callback.from_user.id, "menu") in {322, 323, 324, 325}):
-        try:
-            name = await get_user_field(callback.from_user.id, "name")
-            sex = await get_user_field(callback.from_user.id, "sex")
-            age = await get_user_field(callback.from_user.id, "age") or "не указано"
-            hobby = await get_user_field(callback.from_user.id, "hobby") or "не указано"
-            await callback.message.answer(f"Имя: {name}\nПол: {sex}\nВозраст: {age}\nХобби: {hobby}\n\nВыберите, что хотите изменить.", reply_markup=settings_keyboard)
-            await update_user_field(callback.from_user.id, 'menu', 22)
-        except Exception as e:
-            await callback.answer(f"Ошибка при получении данных: {e}")
-        await update_user_field(callback.from_user.id, 'menu', 22)
-
-@dp.callback_query(lambda query: query.data == "age")
-async def process_settings(callback: CallbackQuery):
-    await callback.message.delete()
-    await callback.message.answer("Введите ваш возраст:", reply_markup=back_keyboard)
-    await update_user_field(callback.from_user.id, 'menu', 323)
-
-@dp.callback_query(lambda query: query.data == "hobby")
-async def process_settings(callback: CallbackQuery):
-    await callback.message.delete()
-    await callback.message.answer("Напишите кратко, чем ты любишь заниматься:", reply_markup=back_keyboard)
-    await update_user_field(callback.from_user.id, 'menu', 324)
-
-@dp.callback_query(lambda query: query.data == "name")
-async def process_settings(callback: CallbackQuery):
-    await callback.message.delete()
-    await callback.message.answer("Давай знакомиться, как тебя зовут?", reply_markup=back_keyboard)
-    await update_user_field(callback.from_user.id, 'menu', 325)
-
-@dp.callback_query(lambda query: query.data == "sex")
-async def process_settings(callback: CallbackQuery):
-    await callback.message.delete()
-    await callback.message.answer("Выбери свой пол:", reply_markup=sex_keyboard)
-    await update_user_field(callback.from_user.id, 'menu', 22)
-
-@dp.callback_query(lambda query: query.data == "man")
-async def process_settings(callback: CallbackQuery):
-    user_id = callback.from_user.id
-    await callback.message.delete()
-    await update_user_field(user_id, 'sex', "Мужской")
-    try:
-        name = await get_user_field(callback.from_user.id, "name")
-        sex = await get_user_field(callback.from_user.id, "sex")
-        age = await get_user_field(callback.from_user.id, "age") or "не указано"
-        hobby = await get_user_field(callback.from_user.id, "hobby") or "не указано"
-        await callback.message.answer(f"Имя: {name}\nПол: {sex}\nВозраст: {age}\nХобби: {hobby}\n\nВыберите, что хотите изменить.", reply_markup=settings_keyboard)
-        await update_user_field(callback.from_user.id, 'menu', 22)
-    except Exception as e:
-        await callback.answer(f"Ошибка при получении данных: {e}")
-    await update_user_field(callback.from_user.id, 'menu', 22)
-
-@dp.callback_query(lambda query: query.data == "woman")
-async def process_settings(callback: CallbackQuery):
-    user_id = callback.from_user.id
-    await callback.message.delete()
-    await update_user_field(user_id, 'sex', "Женский")
-    try:
-        name = await get_user_field(callback.from_user.id, "name")
-        sex = await get_user_field(callback.from_user.id, "sex")
-        age = await get_user_field(callback.from_user.id, "age") or "не указано"
-        hobby = await get_user_field(callback.from_user.id, "hobby") or "не указано"
-        await callback.message.answer(f"Имя: {name}\nПол: {sex}\nВозраст: {age}\nХобби: {hobby}\n\nВыберите, что хотите изменить.", reply_markup=settings_keyboard)
-        await update_user_field(callback.from_user.id, 'menu', 22)
-    except Exception as e:
-        await callback.answer(f"Ошибка при получении данных: {e}")
-    await update_user_field(callback.from_user.id, 'menu', 322)
+    except:
+        print("Except in callback")

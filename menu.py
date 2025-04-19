@@ -5,7 +5,7 @@ from keyboards import main_menu_keyboard, settings_menu_sex_keyboard, settings_m
 size_keyboard,  hero_keyboard, genre_keyboard, moral_keyboard, tale_keyboard, tale_end_keyboard, settings_back_keyboard, tale_settings_menu_keyboard
 
 async def get_new_menu_lvl(button: str, cur_stage = -1, tale_size = 0):
-    if(button in ["start","back main"]):
+    if(button in ["start","back main","back main from settings"]):
         return "main_menu"
     if(button in ["sex"]):
         return "settings_menu_sex"

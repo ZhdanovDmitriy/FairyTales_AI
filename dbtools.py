@@ -338,6 +338,48 @@ async def get_user_context_tale(tale_num: int, tale_size: int):
 
     return context
 
+async def get_parts_tale(tale_num: int, tale_size: int):
+    table_map = {
+        8: ("small_tale", 8),
+        16: ("medium_tale", 16),
+        32: ("large_tale", 32),
+    }
+
+    if tale_size not in table_map:
+        print(f"❌ Неверный размер сказки: {tale_size}")
+        return []
+
+    table_name, num_pairs = table_map[tale_size]
+    total_fields = num_pairs * 2
+    fields = [f"p{i}" if j % 2 == 0 else f"ans{i}" for i in range(num_pairs) for j in range(2)]
+
+    conn = await get_async_connection()
+    fragments = []
+
+    if not conn:
+        print("❌ Не удалось подключиться к БД")
+        return []
+
+    try:
+        async with conn.cursor() as cursor:
+            await cursor.execute(f"SELECT * FROM {table_name} WHERE tale_num = %s", (tale_num,))
+            result = await cursor.fetchone()
+            if not result:
+                print(f"⚠ Запись с tale_num={tale_num} не найдена в {table_name}")
+                return []
+
+            # result[0] — это tale_num, данные начинаются с result[1]
+            data_fields = result[1:]  # Пропускаем tale_num
+
+            # Берем каждое второе поле начиная со второго (индексация с 0 → data_fields[1], data_fields[3], ...)
+            fragments = [cell for i, cell in enumerate(data_fields) if i % 2 == 1 and cell is not None]
+    except Exception as e:
+        print(f"🚨 Ошибка получения фрагментов: {e}")
+    finally:
+        if conn and not conn.closed:
+            conn.close()
+
+    return fragments
 
 async def print_table(table_name: str):
     conn = await get_async_connection()

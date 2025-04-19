@@ -1,10 +1,28 @@
 from aiogram.types import CallbackQuery
 from dbtools import get_user_field, update_user_field
-from config import dp, bot
+from config import bot, router
+from aiogram import F
 from menu import get_new_menu_lvl, get_menu_text, get_menu_keyboard,button_hendler
-from dbtools import print_table, get_tales_field, get_user_field 
+from dbtools import print_table, get_tales_field, get_user_field, get_parts_tale
 
-@dp.callback_query()
+@router.callback_query(F.data == "continue tale")
+async def continue_tale_handler(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    cur_tale = await get_user_field(user_id, "cur_tale")
+    try:
+        parts = await get_parts_tale(cur_tale , await get_tales_field(cur_tale, "tale_size"))
+    except:pass
+    if(cur_tale == 0 or len(parts) == 0):
+        await callback.answer("У вас нет начатой сказки!")
+        return
+    hero = await get_tales_field(cur_tale, "hero") or "ПРОДОЛЖЕНИЕ"
+    await callback.message.answer(f"========[{hero}]========\n")
+    for part in parts[:-1]:
+        await callback.message.answer(part)
+    await update_user_field(user_id, 'menu', "tale_menu")
+    await callback.message.answer(parts[-1],reply_markup=await get_menu_keyboard("tale_menu"))
+
+@router.callback_query()
 async def process_callback(callback: CallbackQuery):
     await print_table("users")
     await print_table("tales")
@@ -12,10 +30,6 @@ async def process_callback(callback: CallbackQuery):
 
     user_id = callback.from_user.id
     button_text = callback.data
-    
-    if(button_text == "continue tale"):
-        await callback.answer("В разработке")
-        return
     
     if(button_text == "Idkt"):
         ans = await callback.message.answer("Подождите, придумываю сказку...")

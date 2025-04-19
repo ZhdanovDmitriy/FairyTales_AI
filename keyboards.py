@@ -28,7 +28,7 @@ settings_menu_keyboard = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="Пол",                   callback_data="sex")],
         [InlineKeyboardButton(text="Возраст",               callback_data="age")],
         [InlineKeyboardButton(text="Хобби",                 callback_data="hobby")],
-        [InlineKeyboardButton(text="Назад",                 callback_data="back main")],
+        [InlineKeyboardButton(text="Назад",                 callback_data="back main from settings")],
     ]
 )
 
@@ -40,7 +40,7 @@ tale_settings_menu_keyboard = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="Главный герой",         callback_data="hero")],
         [InlineKeyboardButton(text="Жанр",                  callback_data="genre")],
         [InlineKeyboardButton(text="Мораль",                callback_data="moral")],
-        [InlineKeyboardButton(text="Назад",                 callback_data="back main")],
+        [InlineKeyboardButton(text="Назад",                 callback_data="back main from settings")],
     ]
 )
 

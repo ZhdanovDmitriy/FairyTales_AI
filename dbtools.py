@@ -173,7 +173,7 @@ async def get_new_tales_num(user_id: int) -> int:
                 INSERT INTO tales (user_id, tale_size, cur_stage, genre, hero, moral)
                      VALUES (%s,       %s,        %s,        %s,    %s,   %s)
                 """,
-                (user_id, None, None, None, None, None)
+                (user_id, 8, None, None, None, None)
             )
             # Получаем идентификатор только что созданной записи
             await cursor.execute("SELECT LAST_INSERT_ID()")

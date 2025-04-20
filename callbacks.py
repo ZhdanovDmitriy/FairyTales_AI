@@ -31,7 +31,7 @@ async def process_callback(callback: CallbackQuery):
     user_id = callback.from_user.id
     button_text = callback.data
     
-    if(button_text == "Idkt"):
+    if(button_text == "Idkt" or button_text == "create"):
         ans = await callback.message.answer("Подождите, придумываю сказку...")
 
     button_hendler_text = await button_hendler(user_id, button_text)
@@ -51,7 +51,7 @@ async def process_callback(callback: CallbackQuery):
         except:
             print("Удаление в callback не удалось")
 
-    if(button_text == "Idkt"):
+    if(button_text == "Idkt" or button_text == "create"):
         try:
             await bot.delete_message(chat_id=callback.message.chat.id,message_id=ans.message_id)
         except: pass

@@ -5,7 +5,6 @@ from aiogram import F
 from menu import get_new_menu_lvl, get_menu_text, get_menu_keyboard,button_hendler
 from dbtools import print_table, get_tales_field, get_user_field, get_parts_tale
 
-
 @router.callback_query(F.data == "continue tale")
 async def continue_tale_handler(callback: CallbackQuery):
     user_id = callback.from_user.id
@@ -13,9 +12,13 @@ async def continue_tale_handler(callback: CallbackQuery):
     try:
         parts = await get_parts_tale(cur_tale , await get_tales_field(cur_tale, "tale_size"))
     except:pass
-    if(cur_tale == 0 or len(parts) == 0):
+    if(cur_tale == 0 or parts == None):
         await callback.answer("У вас нет начатой сказки!")
         return
+    try:
+        await callback.message.delete()
+    except:
+        print("Удаление в callback не удалось")
     hero = await get_tales_field(cur_tale, "hero") or "ПРОДОЛЖЕНИЕ"
     await callback.message.answer(f"========[{hero}]========\n")
     for part in parts[:-1]:
@@ -55,7 +58,8 @@ async def process_callback(callback: CallbackQuery):
     if (button_text == "Idkt" or button_text == "create"):
         try:
             await bot.delete_message(chat_id=callback.message.chat.id, message_id=ans.message_id)
-        except: pass
+        except:
+            print("Удаление в callback не удалось")
 
     try:
         if await get_menu_text(lvl=menu_lvl, user_id=user_id, message=None, tale_size=None) == START_MESSAGE:

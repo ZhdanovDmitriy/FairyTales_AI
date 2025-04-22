@@ -26,7 +26,8 @@ async def chat_handler(message: types.Message):
             try:
                 await bot.delete_message(chat_id=message.chat.id, message_id=await get_user_field(message.from_user.id, "last_message"))
                 await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-            except: pass
+            except:
+                print("[EXCEPT] Удаление в handlers не удалось")
             await message.answer(
                 await get_menu_text(lvl="settings_menu", user_id=user_id, message=None, tale_size=None),
                 reply_markup=await get_menu_keyboard("settings_menu")
@@ -50,7 +51,8 @@ async def chat_handler(message: types.Message):
         try:
             await bot.delete_message(chat_id=message.chat.id, message_id=await get_user_field(message.from_user.id,"last_message"))
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        except: pass
+        except:
+            print("[EXCEPT] Удаление в handlers не удалось")
         await message.answer(
                 await get_menu_text(lvl = "settings_menu",user_id=user_id, message=None, tale_size=None),
                 reply_markup=await get_menu_keyboard("settings_menu")
@@ -70,7 +72,8 @@ async def chat_handler(message: types.Message):
         try:
             await bot.delete_message(chat_id=message.chat.id, message_id=await get_user_field(message.from_user.id,"last_message"))
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        except: pass
+        except:
+            print("[EXCEPT] Удаление в handlers не удалось")
 
         await message.answer(
                 await get_menu_text(lvl = "settings_menu",user_id=user_id, message=None, tale_size=None),
@@ -90,7 +93,8 @@ async def chat_handler(message: types.Message):
         try:
             await bot.delete_message(chat_id=message.chat.id, message_id=await get_user_field(message.from_user.id,"last_message"))
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        except: pass
+        except:
+            print("[EXCEPT] Удаление в handlers не удалось")
 
         await message.answer(
                 await get_menu_text(lvl = "tale_settings",user_id=user_id, message=None, tale_size=None),
@@ -110,7 +114,8 @@ async def chat_handler(message: types.Message):
         try:
             await bot.delete_message(chat_id=message.chat.id, message_id=await get_user_field(message.from_user.id,"last_message"))
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        except: pass
+        except:
+            print("[EXCEPT] Удаление в handlers не удалось")
         
         await message.answer(
                 await get_menu_text(lvl = "tale_settings",user_id=user_id, message=None, tale_size=None),
@@ -132,7 +137,8 @@ async def chat_handler(message: types.Message):
         try:
             await bot.delete_message(chat_id=message.chat.id, message_id=await get_user_field(message.from_user.id,"last_message"))
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        except: pass
+        except:
+            print("[EXCEPT] Удаление в handlers не удалось")
         
         await message.answer(
                 await get_menu_text(lvl = "tale_settings",user_id=user_id, message=None, tale_size=None),

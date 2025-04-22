@@ -9,25 +9,26 @@ from prompts import get_prompt
 from menu import get_menu_text, get_menu_keyboard
 from keyboards import main_menu_keyboard, tale_end_keyboard
 
+
 @dp.message()
 async def chat_handler(message: types.Message):
     user_id = message.from_user.id
-    if(message.text == "/start"):
+    if (message.text == "/start"):
         await add_user(user_id, "не указано", None, "не указано", None, "не указано", message.message_id)
-        await message.answer(START_MESSAGE, reply_markup=main_menu_keyboard)
+        await message.answer_photo(types.FSInputFile("source/Start_image.jpg"), caption=START_MESSAGE, reply_markup=main_menu_keyboard)
         await update_user_field(user_id, 'menu', "main_menu")
     
     if await get_user_field(user_id, "menu") == "settings_menu_age":
         try:
-            age_value = abs(int(message.text))%100
+            age_value = abs(int(message.text)) % 100
             await update_user_field(user_id, 'age', age_value)
             await update_user_field(user_id, 'menu', "settings_menu")
             try:
-                await bot.delete_message(chat_id=message.chat.id, message_id=await get_user_field(message.from_user.id,"last_message"))
+                await bot.delete_message(chat_id=message.chat.id, message_id=await get_user_field(message.from_user.id, "last_message"))
                 await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
             except: pass
             await message.answer(
-                await get_menu_text(lvl = "settings_menu",user_id=user_id, message=None, tale_size=None),
+                await get_menu_text(lvl="settings_menu", user_id=user_id, message=None, tale_size=None),
                 reply_markup=await get_menu_keyboard("settings_menu")
             )
         except ValueError:
@@ -175,7 +176,7 @@ async def chat_handler(message: types.Message):
         await message.delete()
         await msg.delete()
         if(stage == size):
-            await message.answer(bot_response + "\nКонец!\n**Ссылка на форму обратной связи**", reply_markup=tale_end_keyboard)
+            await message.answer(bot_response + "\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту **форму** и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙", reply_markup=tale_end_keyboard)
         else:
             await message.answer(bot_response, reply_markup=await get_menu_keyboard("tale_menu"))
         

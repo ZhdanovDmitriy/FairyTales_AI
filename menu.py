@@ -4,6 +4,7 @@ from prompts import get_prompt
 from keyboards import main_menu_keyboard, settings_menu_sex_keyboard, settings_menu_keyboard,\
 size_keyboard,  hero_keyboard, genre_keyboard, moral_keyboard, tale_keyboard, tale_end_keyboard, settings_back_keyboard, tale_settings_menu_keyboard
 
+
 async def get_new_menu_lvl(button: str, cur_stage = -1, tale_size = 0):
     if(button in ["start","back main","back main from settings"]):
         return "main_menu"
@@ -50,7 +51,7 @@ async def get_menu_text(lvl: str, user_id: int, message: str, tale_size: int):
         sex = await get_user_field(user_id, "sex")
         age = await get_user_field(user_id, "age") or "не указано"
         hobby = await get_user_field(user_id, "hobby") or "не указано"
-        return f"Имя: {name}\nПол: {sex}\nВозраст: {age}\nХобби: {hobby}\n\nВыберите, что хотите изменить."
+        return f"Твой профиль:\n\nИмя: {name}\nПол: {sex}\nВозраст: {age}\nХобби: {hobby}\n\nЕсли хочешь что-то изменить, то нажми на нужную кнопку ниже✏️"
     
     if(lvl in ["tale_settings"]):
         tale_num = await get_user_field(user_id, "cur_tale")
@@ -81,11 +82,11 @@ async def get_menu_text(lvl: str, user_id: int, message: str, tale_size: int):
     if(lvl == "size_menu"):
         return "Какую сказку ты хочешь прочесть?"
     if(lvl == "hero_menu"):
-        return "Кто будет главным героем в сказке?"
+        return "Кто будет главным героем в сказке?\n\nМожешь описать его характер и интересы - так сказка получится ещё увлекательнее!"
     if(lvl == "genre_menu"):
-        return "В каком жанре будет сказка?"
+        return "Какой стиль или жанр будет у сказки?\n\nМожет она о природе или о животных, а может это вообще будет басня. Только скажи, а я подхвачу!"
     if(lvl == "moral_menu"):
-        return "Какая в сказке мораль?"
+        return "Какая в сказке мораль?\n\nМожет она покажет, что упорство и труд ведут к успеху или крепкая дружба способна преодолеть все невзгоды!"
     
     return ""
 

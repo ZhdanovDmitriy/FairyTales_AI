@@ -47,8 +47,8 @@ async def get_menu_text(lvl: str, user_id: int, message: str, tale_size: int):
             await update_user_field(user_id, 'sex', "Женский")
         if(lvl == "settings_menu_sex_man"):
             await update_user_field(user_id, 'sex', "Мужской")
-        name = await get_user_field(user_id, "name")
-        sex = await get_user_field(user_id, "sex")
+        name = await get_user_field(user_id, "name") or "не указано"
+        sex = await get_user_field(user_id, "sex") or "не указано"
         age = await get_user_field(user_id, "age") or "не указано"
         hobby = await get_user_field(user_id, "hobby") or "не указано"
         return f"Твой профиль:\n\nИмя: {name}\nПол: {sex}\nВозраст: {age}\nХобби: {hobby}\n\nЕсли хочешь что-то изменить, то нажми на нужную кнопку ниже✏️"

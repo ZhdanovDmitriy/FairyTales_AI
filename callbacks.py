@@ -5,6 +5,7 @@ from aiogram import F
 from menu import get_new_menu_lvl, get_menu_text, get_menu_keyboard,button_hendler
 from dbtools import print_table, get_tales_field, get_user_field, get_parts_tale
 
+
 @router.callback_query(F.data == "continue tale")
 async def continue_tale_handler(callback: CallbackQuery):
     user_id = callback.from_user.id

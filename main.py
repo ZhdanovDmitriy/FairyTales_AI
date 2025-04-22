@@ -3,6 +3,11 @@ from config import bot, dp
 from dbtools import print_table
 from handlers import chat_handler
 from callbacks import process_callback
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+os.chdir(BASE_DIR)
 
 
 async def main():

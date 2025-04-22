@@ -1,6 +1,6 @@
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, FSInputFile
 from dbtools import get_user_field, update_user_field
-from config import bot, router
+from config import bot, router, START_MESSAGE
 from aiogram import F
 from menu import get_new_menu_lvl, get_menu_text, get_menu_keyboard,button_hendler
 from dbtools import print_table, get_tales_field, get_user_field, get_parts_tale
@@ -32,7 +32,7 @@ async def process_callback(callback: CallbackQuery):
     button_text = callback.data
     
     if(button_text == "Idkt" or button_text == "create"):
-        ans = await callback.message.answer("Подождите, придумываю сказку...")
+        ans = await callback.message.answer('''Секундочку — проверяю, не забыл ли я добавить щепотку волшебства! 💫\n\nПодсказка:\nПопробуй отвечать развёрнуто — так сказка станет интереснее! ✨ ''')
 
     button_hendler_text = await button_hendler(user_id, button_text)
     
@@ -45,22 +45,29 @@ async def process_callback(callback: CallbackQuery):
     print(f"menu_lvl : {menu_lvl}")
     await update_user_field(user_id, 'menu', menu_lvl)
     
-    if(button_text != "Idkt" and button_text != "back main"):
+    if (button_text != "Idkt" and button_text != "back main"):
         try:
             await callback.message.delete()
         except:
             print("Удаление в callback не удалось")
 
-    if(button_text == "Idkt" or button_text == "create"):
+    if (button_text == "Idkt" or button_text == "create"):
         try:
-            await bot.delete_message(chat_id=callback.message.chat.id,message_id=ans.message_id)
+            await bot.delete_message(chat_id=callback.message.chat.id, message_id=ans.message_id)
         except: pass
 
     try:
-        ans = await callback.message.answer(
-            button_hendler_text + await get_menu_text(lvl = menu_lvl, user_id=user_id, message=None, tale_size=None),
-            reply_markup=await get_menu_keyboard(menu_lvl)
-        )
+        if await get_menu_text(lvl=menu_lvl, user_id=user_id, message=None, tale_size=None) == START_MESSAGE:
+            ans = await callback.message.answer_photo(
+                FSInputFile("source/Start_image.jpg"),
+                caption=button_hendler_text + await get_menu_text(lvl=menu_lvl, user_id=user_id, message=None, tale_size=None),
+                reply_markup=await get_menu_keyboard(menu_lvl)
+            )
+        else:
+            ans = await callback.message.answer(
+                button_hendler_text + await get_menu_text(lvl=menu_lvl, user_id=user_id, message=None, tale_size=None),
+                reply_markup=await get_menu_keyboard(menu_lvl)
+            )
         await update_user_field(user_id, 'last_message', ans.message_id)
     except:
         print("Except in callback")

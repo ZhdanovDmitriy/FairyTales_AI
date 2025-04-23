@@ -51,7 +51,7 @@ async def get_menu_text(lvl: str, user_id: int, message: str, tale_size: int):
         sex = await get_user_field(user_id, "sex") or "не указано"
         age = await get_user_field(user_id, "age") or "не указано"
         hobby = await get_user_field(user_id, "hobby") or "не указано"
-        return f"Твой профиль:\n\nИмя: {name}\nПол: {sex}\nВозраст: {age}\nХобби: {hobby}\n\nЕсли хочешь что-то изменить, то нажми на нужную кнопку ниже✏️"
+        return f"Твой профиль:\n\n🏷️ Имя: {name}\n🚻 Пол: {sex}\n👶🏻 Возраст: {age}\n🎮 Хобби: {hobby}\n\nЕсли хочешь что-то изменить, то нажми на нужную кнопку ниже✏️"
     
     if(lvl in ["tale_settings"]):
         tale_num = await get_user_field(user_id, "cur_tale")
@@ -59,7 +59,7 @@ async def get_menu_text(lvl: str, user_id: int, message: str, tale_size: int):
         size = await get_tales_field(tale_num, "tale_size")
         hero = await get_tales_field(tale_num, "hero") or  "Случайный"
         genre = await get_tales_field(tale_num, "genre") or  "Случайный"
-        moral = await get_tales_field(tale_num, "moral") or  "Случайный"
+        moral = await get_tales_field(tale_num, "moral") or  "Случайная"
         match size:
             case 8:
                 size = "5 минут"
@@ -67,26 +67,26 @@ async def get_menu_text(lvl: str, user_id: int, message: str, tale_size: int):
                 size = "10 минут"
             case 32:
                 size = "20 минут"
-        return f"Продолжительность: {size}\nГлавный герой: {hero}\nЖанр: {genre}\nМораль: {moral}\n\nВыберите, что хотите изменить:"
+        return f"Давай настроим сказку под тебя!🚀\n\n⏳ Продолжительность: {size}\n🦸🏻‍♂️ Главный герой: {hero}\n🎭 Жанр: {genre}\n⚖️ Мораль: {moral}\n\nВыбери, что бы ты хотел изменить или нажми создать✨"
 
 
     if(lvl == "settings_menu_sex"):
-        return "Выберите ваш пол:"
+        return "🚻 Укажи свой пол:"
     if(lvl == "settings_menu_name"):
-        return "Давай знакомиться, как тебя зовут?:"
+        return "🏷️ Давай знакомиться, как тебя зовут?"
     if(lvl == "settings_menu_age"):
-        return "Сколько тебе лет?:"
+        return "👶🏻 Сколько тебе лет?"
     if(lvl == "settings_menu_hobby"):
-        return "Какие у тебя увлечения?:"
+        return "🎮 Какие у тебя увлечения?"
     
     if(lvl == "size_menu"):
-        return "Какую сказку ты хочешь прочесть?"
+        return "⏳Сколько будет идти сказка?"
     if(lvl == "hero_menu"):
-        return "Кто будет главным героем в сказке?\n\nМожешь описать его характер и интересы - так сказка получится ещё увлекательнее!"
+        return "🦸🏻‍♂️ Кто будет главным героем в сказке?\n\nМожешь описать его характер и интересы - так сказка получится ещё увлекательнее!"
     if(lvl == "genre_menu"):
-        return "Какой стиль или жанр будет у сказки?\n\nМожет она о природе или о животных, а может это вообще будет басня. Только скажи, а я подхвачу!"
+        return "🎭 Какой стиль или жанр будет у сказки?\n\nМожет она о природе или о животных, а может это вообще будет басня. Только скажи, а я подхвачу!"
     if(lvl == "moral_menu"):
-        return "Какая в сказке мораль?\n\nМожет она покажет, что упорство и труд ведут к успеху или крепкая дружба способна преодолеть все невзгоды!"
+        return "⚖️ Какая в сказке мораль?\n\nМожет она покажет, что упорство и труд ведут к успеху или крепкая дружба способна преодолеть все невзгоды!"
     
     return ""
 
@@ -135,12 +135,12 @@ async def button_hendler(user_id: int, button: str):
         await update_tales_field(await get_user_field(user_id, "cur_tale"), "tale_size", 32)
     if(button == "I"):
         await update_tales_field(await get_user_field(user_id, "cur_tale"), "hero", "Я")
-    if(button == "Idkh"):
+    if(button == "random hero"):
         await update_tales_field(await get_user_field(user_id, "cur_tale"), "hero", "Случайный")
-    if(button == "Idkg"):
+    if(button == "random genre"):
         await update_tales_field(await get_user_field(user_id, "cur_tale"), "genre", "Случайный")
-    if(button == "Idkm"):
-        await update_tales_field(await get_user_field(user_id, "cur_tale"), "moral", "Случайный")
+    if(button == "random moral"):
+        await update_tales_field(await get_user_field(user_id, "cur_tale"), "moral", "Случайная")
 
     if(button == "Idkt" or button == "create"):
         tale_num = await get_user_field(user_id, "cur_tale")

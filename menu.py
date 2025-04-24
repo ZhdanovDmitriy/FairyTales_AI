@@ -22,7 +22,7 @@ async def get_new_menu_lvl(button: str, cur_stage = -1, tale_size = 0):
         return "settings_menu_hobby"
     if(button in ["settings", "back settings"]):
         return "settings_menu"
-    if(button in ["new tale", "small tale", "medium tale", "large tale", "Idkm", "I", "random hero", "random genre"]):
+    if(button in ["new tale", "small tale", "medium tale", "large tale", "Idkm", "I", "random hero", "random genre", "random moral"]):
         return "tale_settings"
     if(button in ["create", "Idkt", "continue_tale", "continue tale"]):
         if(cur_stage == tale_size):

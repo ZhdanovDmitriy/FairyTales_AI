@@ -27,7 +27,7 @@ settings_menu_keyboard = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="🏷️ Имя",                   callback_data="name")],
         [InlineKeyboardButton(text="🚻 Пол",                   callback_data="sex")],
         [InlineKeyboardButton(text="👶🏻 Возраст",               callback_data="age")],
-        [InlineKeyboardButton(text="🎮 Увлечения",                 callback_data="hobby")],
+        [InlineKeyboardButton(text="🎮 Увлечения",             callback_data="hobby")],
         [InlineKeyboardButton(text="↩️ Назад",                 callback_data="back main from settings")],
     ]
 )

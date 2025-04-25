@@ -22,9 +22,9 @@ async def continue_tale_handler(callback: CallbackQuery):
     hero = await get_tales_field(cur_tale, "hero") or "ПРОДОЛЖЕНИЕ"
     await callback.message.answer(f"========[{hero}]========\n")
     for part in parts[:-1]:
-        await callback.message.answer(part)
+        await callback.message.answer(part, parse_mode="Markdown")
     await update_user_field(user_id, 'menu', "tale_menu")
-    await callback.message.answer(parts[-1],reply_markup=await get_menu_keyboard("tale_menu"))
+    await callback.message.answer(parts[-1], parse_mode="Markdown", reply_markup=await get_menu_keyboard("tale_menu"))
 
 @router.callback_query()
 async def process_callback(callback: CallbackQuery):
@@ -36,7 +36,7 @@ async def process_callback(callback: CallbackQuery):
     button_text = callback.data
     
     if(button_text == "Idkt" or button_text == "create"):
-        ans = await callback.message.answer('''Секундочку — проверяю, не забыл ли я добавить щепотку волшебства! 💫\n\nПодсказка:\nПопробуй отвечать развёрнуто — так сказка станет интереснее! ✨ ''')
+        ans = await callback.message.answer('''Секундочку — проверяю, не забыл ли я добавить щепотку волшебства! 💫\n\n*Подсказка*:\nПопробуй отвечать развёрнуто — так сказка станет интереснее! ✨ ''', parse_mode="Markdown")
 
     button_hendler_text = await button_hendler(user_id, button_text)
     
@@ -66,11 +66,13 @@ async def process_callback(callback: CallbackQuery):
             ans = await callback.message.answer_photo(
                 FSInputFile("source/Start_image.jpg"),
                 caption=button_hendler_text + await get_menu_text(lvl=menu_lvl, user_id=user_id, message=None, tale_size=None),
+                parse_mode="Markdown",
                 reply_markup=await get_menu_keyboard(menu_lvl)
             )
         else:
             ans = await callback.message.answer(
                 button_hendler_text + await get_menu_text(lvl=menu_lvl, user_id=user_id, message=None, tale_size=None),
+                parse_mode="Markdown",
                 reply_markup=await get_menu_keyboard(menu_lvl)
             )
         await update_user_field(user_id, 'last_message', ans.message_id)

@@ -74,15 +74,6 @@ async def process_callback(callback: CallbackQuery):
                 reply_markup=await get_menu_keyboard(menu_lvl)
             )
         else:
-            if(cur_stage == tale_size and tale_size != None):
-                ans = await callback.message.answer(
-                    button_hendler_text + await get_menu_text(lvl=menu_lvl, user_id=user_id),
-                    parse_mode="Markdown",
-                )
-                #Удалить в release версии
-                ans = await callback.message.answer(f"\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту {form_link} и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙", reply_markup=tale_end_keyboard)
-                return
-            
             ans = await callback.message.answer(
                 button_hendler_text + await get_menu_text(lvl=menu_lvl, user_id=user_id),
                 parse_mode="Markdown",
@@ -91,5 +82,11 @@ async def process_callback(callback: CallbackQuery):
         await update_user_field(user_id, 'last_message', ans.message_id)
     except:
         print("Except in callback")
+
+    #Удалить в release версии
+    if(button_text == "Idkt" and cur_stage == tale_size):
+        ans = await callback.message.answer(f"\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту {form_link} и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙", reply_markup=tale_end_keyboard)
+        return
+            
 
     

@@ -51,7 +51,7 @@ async def get_menu_text(lvl: str, user_id: int):
         sex = await get_user_field(user_id, "sex") or "не указано"
         age = await get_user_field(user_id, "age") or "не указано"
         hobby = await get_user_field(user_id, "hobby") or "не указано"
-        return f"Твой профиль:\n\n🏷️ Имя: {name}\n🚻 Пол: {sex}\n👶🏻 Возраст: {age}\n🎮 Увлечения: {hobby}\n\nЕсли хочешь что-то изменить, то нажми на нужную кнопку ниже✏️"
+        return f"*Твой профиль:*\n\n🏷️ *Имя:* {name}\n🚻 *Пол:* {sex}\n👶🏻 *Возраст:* {age}\n🎮 *Увлечения:* {hobby}\n\nЕсли хочешь что-то изменить, то нажми на нужную кнопку ниже✏️"
     
     if(lvl in ["tale_settings"]):
         tale_num = await get_user_field(user_id, "cur_tale")
@@ -69,7 +69,7 @@ async def get_menu_text(lvl: str, user_id: int):
                 size = "10 минут"
             case 32:
                 size = "20 минут"
-        return f"Давай настроим сказку под тебя!🚀\n\n⏳ Продолжительность: {size}\n🦸🏻‍♂️ Главный герой: {hero}\n🎭 Жанр: {genre}\n⚖️ Мораль: {moral}\n\nВыбери, что бы ты хотел изменить или нажми создать✨"
+        return f"*Давай настроим сказку под тебя!*🚀\n\n⏳ *Продолжительность:* {size}\n🦸🏻‍♂️ *Главный герой:* {hero}\n🎭 *Жанр:* {genre}\n⚖️ *Мораль:* {moral}\n\nВыбери, что бы ты хотел изменить или нажми создать✨"
 
 
     if(lvl == "settings_menu_sex"):
@@ -159,12 +159,12 @@ async def button_hendler(user_id: int, button: str):
         prompt = await get_prompt("Придумай сам, что-нибудь интересное.",user_id, tale_num);
         print(f"prompt = {prompt}")
         await add_data_to_tale(tale_num, prompt, size)
-        response = client.chat.completions.create(
+        response = await client.chat.completions.create(
             model="deepseek-chat",
             messages=await get_user_context_tale(tale_num, size),
             stream=False,
             temperature=TEMPERATURE,
-            parallel_tool_calls = True
+            parallel_tool_calls=True
         )
         bot_response = response.choices[0].message.content
         await add_data_to_tale(tale_num, bot_response, size)

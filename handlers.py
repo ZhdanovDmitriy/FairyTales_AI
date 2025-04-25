@@ -167,12 +167,12 @@ async def chat_handler(message: types.Message):
         print(f"prompt = {prompt}")
         await add_data_to_tale(tale_num, prompt, size)
         msg = await message.answer(await get_stub_message())
-        response = client.chat.completions.create(
+        response = await client.chat.completions.create(
             model="deepseek-chat",
             messages=await get_user_context_tale(tale_num, size),
             stream=False,
             temperature=TEMPERATURE,
-            parallel_tool_calls = True
+            parallel_tool_calls=True
         )
         bot_response = response.choices[0].message.content
         await add_data_to_tale(tale_num, bot_response, size)
@@ -182,7 +182,7 @@ async def chat_handler(message: types.Message):
         await message.delete()
         await msg.delete()
         if(stage == size):
-            await message.answer(bot_response, parse_moSde="Markdown")
+            await message.answer(bot_response, parse_moSde="Markdown", reply_markup=tale_end_keyboard)
             #Удалить в release версии
             await message.answer(f"\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту {form_link} и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙", reply_markup=tale_end_keyboard)
         else:

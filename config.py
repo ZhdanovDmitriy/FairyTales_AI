@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import AsyncOpenAI
 import aiomysql
 from aiogram import Bot, Dispatcher, Router
 
@@ -20,7 +20,7 @@ dp = Dispatcher()
 router = Router()
 dp.include_router(router)
 
-client = OpenAI(api_key=API_KEY, base_url="https://api.deepseek.com")
+client = AsyncOpenAI(api_key=API_KEY, base_url="https://api.deepseek.com")
 
 async def get_async_connection():
     try:

@@ -5,7 +5,7 @@ from aiogram.types import Message
 from dbtools import add_user, update_user_field, get_user_field, add_tale_if_not, \
     add_data_to_tale, get_tales_field,  update_tales_field, print_table, get_user_context_tale
 from config import START_MESSAGE, TEMPERATURE, client, bot, dp
-from prompts import get_prompt
+from prompts import get_prompt, get_stub_message
 from menu import get_menu_text, get_menu_keyboard
 from keyboards import main_menu_keyboard, tale_end_keyboard
 form_link = "*ССЫЛКА*"
@@ -166,7 +166,7 @@ async def chat_handler(message: types.Message):
         prompt = await get_prompt(message.text,user_id, tale_num);
         print(f"prompt = {prompt}")
         await add_data_to_tale(tale_num, prompt, size)
-        msg = await message.answer("Придумываю сказку...")
+        msg = await message.answer(await get_stub_message())
         response = client.chat.completions.create(
             model="deepseek-chat",
             messages=await get_user_context_tale(tale_num, size),
@@ -182,8 +182,9 @@ async def chat_handler(message: types.Message):
         await message.delete()
         await msg.delete()
         if(stage == size):
-            await message.answer(bot_response, parse_mode="Markdown")
-            await message.answer("\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту {form_link} и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙", reply_markup=tale_end_keyboard)
+            await message.answer(bot_response, parse_moSde="Markdown")
+            #Удалить в release версии
+            await message.answer(f"\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту {form_link} и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙", reply_markup=tale_end_keyboard)
         else:
             await message.answer(bot_response,parse_mode="Markdown", reply_markup=await get_menu_keyboard("tale_menu"))
         

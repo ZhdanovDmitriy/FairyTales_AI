@@ -13,7 +13,10 @@ os.chdir(BASE_DIR)
 async def main():
     await print_table("users")
     await print_table("tales")
+    await print_table("tiny_tale")
     await print_table("small_tale")
+    await print_table("medium_tale")
+    await print_table("large_tale")
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 

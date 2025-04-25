@@ -62,7 +62,7 @@ async def get_menu_text(lvl: str, user_id: int):
         moral = await get_tales_field(tale_num, "moral") or  "Случайная"
         match size:
             case 3:
-                size = "5 минут"
+                size = "3 минуты"
             case 8:
                 size = "5 минут"
             case 16:

@@ -38,7 +38,7 @@ async def get_new_menu_lvl(button: str, cur_stage = -1, tale_size = 0):
         return "moral_menu"
     
 
-async def get_menu_text(lvl: str, user_id: int, message: str, tale_size: int):
+async def get_menu_text(lvl: str, user_id: int):
     if(lvl == "main_menu"):
         return START_MESSAGE
     

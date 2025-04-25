@@ -29,7 +29,7 @@ async def chat_handler(message: types.Message):
             except:
                 print("[EXCEPT] Удаление в handlers не удалось")
             await message.answer(
-                await get_menu_text(lvl="settings_menu", user_id=user_id, message=None, tale_size=None),
+                await get_menu_text(lvl="settings_menu", user_id=user_id),
                 reply_markup=await get_menu_keyboard("settings_menu")
             )
         except ValueError:
@@ -54,7 +54,7 @@ async def chat_handler(message: types.Message):
         except:
             print("[EXCEPT] Удаление в handlers не удалось")
         await message.answer(
-                await get_menu_text(lvl = "settings_menu",user_id=user_id, message=None, tale_size=None),
+                await get_menu_text(lvl = "settings_menu",user_id=user_id),
                 reply_markup=await get_menu_keyboard("settings_menu")
         )
 
@@ -76,7 +76,7 @@ async def chat_handler(message: types.Message):
             print("[EXCEPT] Удаление в handlers не удалось")
 
         await message.answer(
-                await get_menu_text(lvl = "settings_menu",user_id=user_id, message=None, tale_size=None),
+                await get_menu_text(lvl = "settings_menu",user_id=user_id),
                 reply_markup=await get_menu_keyboard("settings_menu")
         )
 
@@ -97,7 +97,7 @@ async def chat_handler(message: types.Message):
             print("[EXCEPT] Удаление в handlers не удалось")
 
         await message.answer(
-                await get_menu_text(lvl = "tale_settings",user_id=user_id, message=None, tale_size=None),
+                await get_menu_text(lvl = "tale_settings",user_id=user_id),
                 reply_markup=await get_menu_keyboard("tale_settings")
         )
 
@@ -118,7 +118,7 @@ async def chat_handler(message: types.Message):
             print("[EXCEPT] Удаление в handlers не удалось")
         
         await message.answer(
-                await get_menu_text(lvl = "tale_settings",user_id=user_id, message=None, tale_size=None),
+                await get_menu_text(lvl = "tale_settings",user_id=user_id),
                 reply_markup=await get_menu_keyboard("tale_settings")
         )
 
@@ -141,7 +141,7 @@ async def chat_handler(message: types.Message):
             print("[EXCEPT] Удаление в handlers не удалось")
         
         await message.answer(
-                await get_menu_text(lvl = "tale_settings",user_id=user_id, message=None, tale_size=None),
+                await get_menu_text(lvl = "tale_settings",user_id=user_id),
                 reply_markup=await get_menu_keyboard("tale_settings")
         )
 
@@ -182,7 +182,8 @@ async def chat_handler(message: types.Message):
         await message.delete()
         await msg.delete()
         if(stage == size):
-            await message.answer(bot_response + f"\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту {form_link} и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙", parse_mode="Markdown", reply_markup=tale_end_keyboard)
+            await message.answer(bot_response, parse_mode="Markdown")
+            await message.answer("\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту {form_link} и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙", reply_markup=tale_end_keyboard)
         else:
             await message.answer(bot_response,parse_mode="Markdown", reply_markup=await get_menu_keyboard("tale_menu"))
         

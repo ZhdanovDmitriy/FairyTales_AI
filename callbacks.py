@@ -62,16 +62,16 @@ async def process_callback(callback: CallbackQuery):
             print("Удаление в callback не удалось")
 
     try:
-        if await get_menu_text(lvl=menu_lvl, user_id=user_id, message=None, tale_size=None) == START_MESSAGE:
+        if await get_menu_text(lvl=menu_lvl, user_id=user_id) == START_MESSAGE:
             ans = await callback.message.answer_photo(
                 FSInputFile("source/Start_image.jpg"),
-                caption=button_hendler_text + await get_menu_text(lvl=menu_lvl, user_id=user_id, message=None, tale_size=None),
+                caption=button_hendler_text + await get_menu_text(lvl=menu_lvl, user_id=user_id),
                 parse_mode="Markdown",
                 reply_markup=await get_menu_keyboard(menu_lvl)
             )
         else:
             ans = await callback.message.answer(
-                button_hendler_text + await get_menu_text(lvl=menu_lvl, user_id=user_id, message=None, tale_size=None),
+                button_hendler_text + await get_menu_text(lvl=menu_lvl, user_id=user_id),
                 parse_mode="Markdown",
                 reply_markup=await get_menu_keyboard(menu_lvl)
             )

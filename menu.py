@@ -22,7 +22,7 @@ async def get_new_menu_lvl(button: str, cur_stage = -1, tale_size = 0):
         return "settings_menu_hobby"
     if(button in ["settings", "back settings"]):
         return "settings_menu"
-    if(button in ["new tale", "small tale", "medium tale", "large tale", "Idkm", "I", "random hero", "random genre", "random moral"]):
+    if(button in ["new tale", "tiny tale", "small tale", "medium tale", "large tale", "Idkm", "I", "random hero", "random genre", "random moral"]):
         return "tale_settings"
     if(button in ["create", "Idkt", "continue_tale", "continue tale"]):
         if(cur_stage == tale_size):
@@ -51,7 +51,7 @@ async def get_menu_text(lvl: str, user_id: int, message: str, tale_size: int):
         sex = await get_user_field(user_id, "sex") or "не указано"
         age = await get_user_field(user_id, "age") or "не указано"
         hobby = await get_user_field(user_id, "hobby") or "не указано"
-        return f"Твой профиль:\n\n🏷️ Имя: {name}\n🚻 Пол: {sex}\n👶🏻 Возраст: {age}\n🎮 Хобби: {hobby}\n\nЕсли хочешь что-то изменить, то нажми на нужную кнопку ниже✏️"
+        return f"Твой профиль:\n\n🏷️ Имя: {name}\n🚻 Пол: {sex}\n👶🏻 Возраст: {age}\n🎮 Увлечения: {hobby}\n\nЕсли хочешь что-то изменить, то нажми на нужную кнопку ниже✏️"
     
     if(lvl in ["tale_settings"]):
         tale_num = await get_user_field(user_id, "cur_tale")
@@ -61,6 +61,8 @@ async def get_menu_text(lvl: str, user_id: int, message: str, tale_size: int):
         genre = await get_tales_field(tale_num, "genre") or  "Случайный"
         moral = await get_tales_field(tale_num, "moral") or  "Случайная"
         match size:
+            case 3:
+                size = "5 минут"
             case 8:
                 size = "5 минут"
             case 16:
@@ -127,6 +129,8 @@ async def get_menu_keyboard(lvl: str):
 async def button_hendler(user_id: int, button: str):
     if(button == "new tale"):
         await update_user_field(user_id, "cur_tale", await get_new_tales_num(user_id))
+    if(button == "tiny tale"):
+        await update_tales_field(await get_user_field(user_id, "cur_tale"), "tale_size", 3)
     if(button == "small tale"):
         await update_tales_field(await get_user_field(user_id, "cur_tale"), "tale_size", 8)
     if(button == "medium tale"):

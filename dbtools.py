@@ -6,6 +6,7 @@ allowed_fields = {"users": {"sex", "age", "hobby", "menu", "name", "last_message
                   "tales": {"tale_size", "cur_stage", "genre", "hero", "moral"}}
 
 table_map = {
+        3: ("tiny_tale", 3),
         8: ("small_tale", 8),
         16: ("medium_tale", 16),
         32: ("large_tale", 32),

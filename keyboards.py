@@ -27,7 +27,7 @@ settings_menu_keyboard = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="🏷️ Имя",                   callback_data="name")],
         [InlineKeyboardButton(text="🚻 Пол",                   callback_data="sex")],
         [InlineKeyboardButton(text="👶🏻 Возраст",               callback_data="age")],
-        [InlineKeyboardButton(text="🎮 Хобби",                 callback_data="hobby")],
+        [InlineKeyboardButton(text="🎮 Увлечения",                 callback_data="hobby")],
         [InlineKeyboardButton(text="↩️ Назад",                 callback_data="back main from settings")],
     ]
 )
@@ -59,6 +59,7 @@ tale_end_keyboard = InlineKeyboardMarkup(
 
 size_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
+        [InlineKeyboardButton(text="⚡ 3 миинуты",              callback_data="tiny tale")],
         [InlineKeyboardButton(text="🐇 5 миинут",              callback_data="small tale")],
         [InlineKeyboardButton(text="🦔 10 миинут",             callback_data="medium tale")],
         [InlineKeyboardButton(text="🐌 20 минут",              callback_data="large tale")],

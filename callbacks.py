@@ -1,12 +1,11 @@
 from aiogram.types import CallbackQuery, FSInputFile
 from dbtools import get_user_field, update_user_field
-from config import bot, router, START_MESSAGE
+from config import bot, router, START_MESSAGE, LINK
 from aiogram import F
 from menu import get_new_menu_lvl, get_menu_text, get_menu_keyboard,button_hendler
 from dbtools import get_tales_field, get_user_field, get_parts_tale
 from keyboards import tale_end_keyboard
 from prompts import get_stub_message
-form_link = "*ССЫЛКА*"
 
 @router.callback_query(F.data == "continue tale")
 async def continue_tale_handler(callback: CallbackQuery):
@@ -85,7 +84,7 @@ async def process_callback(callback: CallbackQuery):
 
     #Удалить в release версии
     if(button_text == "Idkt" and cur_stage == tale_size):
-        ans = await callback.message.answer(f"\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту {form_link} и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙", reply_markup=tale_end_keyboard)
+        ans = await callback.message.answer(f"\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту [форму]({LINK}) и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙",parse_mode="Markdown", reply_markup=tale_end_keyboard)
         return
             
 

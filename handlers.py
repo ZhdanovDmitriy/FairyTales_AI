@@ -4,11 +4,10 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from dbtools import add_user, update_user_field, get_user_field, add_tale_if_not, \
     add_data_to_tale, get_tales_field,  update_tales_field, print_table, get_user_context_tale
-from config import START_MESSAGE, TEMPERATURE, client, bot, dp
+from config import START_MESSAGE, TEMPERATURE, client, bot, dp, LINK
 from prompts import get_prompt, get_stub_message
 from menu import get_menu_text, get_menu_keyboard
 from keyboards import main_menu_keyboard, tale_end_keyboard
-form_link = "*ССЫЛКА*"
 
 @dp.message()
 async def chat_handler(message: types.Message):
@@ -153,17 +152,22 @@ async def chat_handler(message: types.Message):
             await msg.delete()
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
             return
-
+        
         tale_num = await get_user_field(user_id, "cur_tale")
         size = await get_tales_field(tale_num, "tale_size")
         if(await get_tales_field(tale_num, "cur_stage") == None):
             await update_tales_field(tale_num, 'cur_stage', 0)
         await add_tale_if_not(tale_num, size)
-        stage = await get_tales_field(tale_num, 'cur_stage') + 1
-        print(f"stage = {stage}")
-        await update_tales_field(tale_num, 'cur_stage', stage)
+        stage = await get_tales_field(tale_num, 'cur_stage')
+        
+        if(stage > size):  
+            await message.answer("Твоя сказка подошла к концу!\nТы можешь закончить эту сказку и начать новую!", reply_markup=tale_end_keyboard)
+            return
 
-        prompt = await get_prompt(message.text,user_id, tale_num);
+        print(f"stage = {stage}")
+        await update_tales_field(tale_num, 'cur_stage', stage + 1)
+
+        prompt = await get_prompt(message.text,user_id, tale_num)
         print(f"prompt = {prompt}")
         await add_data_to_tale(tale_num, prompt, size)
         msg = await message.answer(await get_stub_message())
@@ -184,7 +188,7 @@ async def chat_handler(message: types.Message):
         if(stage == size):
             await message.answer(bot_response, parse_moSde="Markdown", reply_markup=tale_end_keyboard)
             #Удалить в release версии
-            await message.answer(f"\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту {form_link} и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙", reply_markup=tale_end_keyboard)
+            await message.answer(f"\nКонец!\nЯ очень рад, что ты побывал в моей сказке!\n\nСейчас я учусь рассказывать истории ещё интереснее, и твоя помощь мне очень нужна! Если тебе понравилось это приключение или ты хочешь что-то изменить — скажи мне!\n\nЗаполни эту [форму]({LINK}) и благодаря тебе я стану лучше✨\n\nСпасибо, что помогаешь мне создавать самые лучшие сказки на свете! 💙",parse_mode="Markdown", reply_markup=tale_end_keyboard)
         else:
             await message.answer(bot_response,parse_mode="Markdown", reply_markup=await get_menu_keyboard("tale_menu"))
         

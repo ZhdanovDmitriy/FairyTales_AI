@@ -160,12 +160,16 @@ async def chat_handler(message: types.Message):
         await add_tale_if_not(tale_num, size)
         stage = await get_tales_field(tale_num, 'cur_stage')
         
-        if(stage > size):  
-            await message.answer("Твоя сказка подошла к концу!\nТы можешь закончить эту сказку и начать новую!", reply_markup=tale_end_keyboard)
+        if(stage >= size):
+            msg = await message.answer("Твоя сказка подошла к концу!\nТы можешь закончить эту сказку и начать новую!")
+            await asyncio.sleep(3)
+            await msg.delete()
+            await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
             return
 
+        stage = stage + 1
         print(f"stage = {stage}")
-        await update_tales_field(tale_num, 'cur_stage', stage + 1)
+        await update_tales_field(tale_num, 'cur_stage', stage)
 
         prompt = await get_prompt(message.text,user_id, tale_num)
         print(f"prompt = {prompt}")

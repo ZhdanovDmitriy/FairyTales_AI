@@ -48,7 +48,6 @@ async def get_db_state(user_id: int) -> dict:
         if tale_size == return_fail_value or tale_size is None:
             return {"user": user_data, "tale": None}
 
-        context = await get_user_context_tale(tale_num, tale_size)
         answers = await get_parts_tale(tale_num, tale_size)
 
         tale_data = {
@@ -58,8 +57,7 @@ async def get_db_state(user_id: int) -> dict:
             "genre": await get_tales_field(tale_num, "genre"),
             "hero": await get_tales_field(tale_num, "hero"),
             "moral": await get_tales_field(tale_num, "moral"),
-            "answers": answers,
-            "dialogue": context
+            "answers": answers
         }
 
         return {"user": user_data, "tale": tale_data}

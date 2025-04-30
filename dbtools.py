@@ -1,7 +1,6 @@
 from config import get_async_connection
-from typing import Any, Optional, Dict
+from typing import Any, Optional
 import asyncio
-import traceback
 
 allowed_fields = {"users": {"sex", "age", "hobby", "menu", "name", "last_message", "cur_tale"},
                   "tales": {"tale_size", "cur_stage", "genre", "hero", "moral"}}

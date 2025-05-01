@@ -57,7 +57,7 @@ async def get_db_state(user_id: int) -> dict:
             "genre": await get_tales_field(tale_num, "genre"),
             "hero": await get_tales_field(tale_num, "hero"),
             "moral": await get_tales_field(tale_num, "moral"),
-            "answers": answers
+            "answer": answers[-1]
         }
 
         return {"user": user_data, "tale": tale_data}

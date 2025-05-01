@@ -38,13 +38,13 @@ async def chat_handler(message: types.Message):
             except:
                 print("[EXCEPT] Удаление в handlers не удалось")
 
-            await message.answer(await get_menu_text(lvl="settings_menu", user_id=user_id), reply_markup=await get_menu_keyboard("settings_menu"))
+            await message.answer(await get_menu_text(lvl="settings_menu", user_id=user_id), parse_mode="Markdown", reply_markup=await get_menu_keyboard("settings_menu"))
             
             # Логируем успешное обновление возраста
             await log_event(user_id, log_message, "Возраст обновлен", await get_db_state(user_id))
 
         except ValueError:
-            msg = await message.answer("Некорректное значение возраста, введите число.")
+            msg = await message.answer("Некорректное значение возраста, введите число.", parse_mode="Markdown")
             await asyncio.sleep(3)
             await msg.delete()
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -55,7 +55,7 @@ async def chat_handler(message: types.Message):
 
     elif await get_user_field(user_id, "menu") == "settings_menu_hobby":
         if len(message.text) > 500:
-            msg = await message.answer("Я не смоуг столько запомнить. Пожалуйста, сократите свой рассказ хотя бы до 500 символов.")
+            msg = await message.answer("Я не смоуг столько запомнить. Пожалуйста, сократите свой рассказ хотя бы до 500 символов.", parse_mode="Markdown")
             await asyncio.sleep(3)
             await msg.delete()
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -69,14 +69,14 @@ async def chat_handler(message: types.Message):
         except:
             print("[EXCEPT] Удаление в handlers не удалось")
 
-        await message.answer(await get_menu_text(lvl="settings_menu", user_id=user_id), reply_markup=await get_menu_keyboard("settings_menu"))
+        await message.answer(await get_menu_text(lvl="settings_menu", user_id=user_id), parse_mode="Markdown", reply_markup=await get_menu_keyboard("settings_menu"))
 
         # Логируем успешное обновление хобби
         await log_event(user_id, log_message, "Хобби обновлено", await get_db_state(user_id))
 
     elif await get_user_field(user_id, "menu") == "settings_menu_name":
         if len(message.text) > 50:
-            msg = await message.answer("Я не могу поверить, что у тебя такое сложное имя.\nМожет быть у тебя есть более краткая форма имени?")
+            msg = await message.answer("Я не могу поверить, что у тебя такое сложное имя.\nМожет быть у тебя есть более краткая форма имени?", parse_mode="Markdown")
             await asyncio.sleep(3)
             await msg.delete()
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -91,14 +91,14 @@ async def chat_handler(message: types.Message):
         except:
             print("[EXCEPT] Удаление в handlers не удалось")
 
-        await message.answer(await get_menu_text(lvl="settings_menu", user_id=user_id), reply_markup=await get_menu_keyboard("settings_menu"))
+        await message.answer(await get_menu_text(lvl="settings_menu", user_id=user_id), parse_mode="Markdown", reply_markup=await get_menu_keyboard("settings_menu"))
 
         # Логируем успешное обновление имени
         await log_event(user_id, log_message, "Имя обновлено", await get_db_state(user_id))
 
     elif await get_user_field(user_id, "menu") == "hero_menu":
         if len(message.text) > 300:
-            msg = await message.answer("Я уже забыл, что ты говорил в начале.\nМожет быть ты сможешь сократить рассказ?")
+            msg = await message.answer("Я уже забыл, что ты говорил в начале.\nМожет быть ты сможешь сократить рассказ?", parse_mode="Markdown")
             await asyncio.sleep(3)
             await msg.delete()
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -112,14 +112,14 @@ async def chat_handler(message: types.Message):
         except:
             print("[EXCEPT] Удаление в handlers не удалось")
 
-        await message.answer(await get_menu_text(lvl="tale_settings", user_id=user_id), reply_markup=await get_menu_keyboard("tale_settings"))
+        await message.answer(await get_menu_text(lvl="tale_settings", user_id=user_id), parse_mode="Markdown", reply_markup=await get_menu_keyboard("tale_settings"))
 
         # Логируем успешное обновление героя
         await log_event(user_id, log_message, "Герой обновлен", await get_db_state(user_id))
 
     elif await get_user_field(user_id, "menu") == "genre_menu":
         if len(message.text) > 300:
-            msg = await message.answer("Я уже забыл, что ты говорил в начале.\nМожет быть ты сможешь сократить рассказ?")
+            msg = await message.answer("Я уже забыл, что ты говорил в начале.\nМожет быть ты сможешь сократить рассказ?", parse_mode="Markdown")
             await asyncio.sleep(3)
             await msg.delete()
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -133,14 +133,14 @@ async def chat_handler(message: types.Message):
         except:
             print("[EXCEPT] Удаление в handlers не удалось")
         
-        await message.answer(await get_menu_text(lvl="tale_settings", user_id=user_id), reply_markup=await get_menu_keyboard("tale_settings"))
+        await message.answer(await get_menu_text(lvl="tale_settings", user_id=user_id), parse_mode="Markdown", reply_markup=await get_menu_keyboard("tale_settings"))
 
         # Логируем успешное обновление жанра
         await log_event(user_id, log_message, "Жанр обновлен", await get_db_state(user_id))
 
     elif await get_user_field(user_id, "menu") == "moral_menu":
         if len(message.text) > 300:
-            msg = await message.answer("Я уже забыл, что ты говорил в начале.\nМожет быть ты сможешь сократить рассказ?")
+            msg = await message.answer("Я уже забыл, что ты говорил в начале.\nМожет быть ты сможешь сократить рассказ?", parse_mode="Markdown")
             await asyncio.sleep(3)
             await msg.delete()
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -155,14 +155,14 @@ async def chat_handler(message: types.Message):
         except:
             print("[EXCEPT] Удаление в handlers не удалось")
         
-        await message.answer(await get_menu_text(lvl="tale_settings", user_id=user_id), reply_markup=await get_menu_keyboard("tale_settings"))
+        await message.answer(await get_menu_text(lvl="tale_settings", user_id=user_id), parse_mode="Markdown", reply_markup=await get_menu_keyboard("tale_settings"))
 
         # Логируем успешное обновление морали
         await log_event(user_id, log_message, "Мораль обновлена", await get_db_state(user_id))
 
     elif await get_user_field(user_id, "menu") == "tale_menu":
         if len(message.text) > 500:
-            msg = await message.answer("Я уже забыл, что ты говорил в начале.\nМожет быть ты сможешь сократить рассказ?")
+            msg = await message.answer("Я уже забыл, что ты говорил в начале.\nМожет быть ты сможешь сократить рассказ?", parse_mode="Markdown")
             await asyncio.sleep(3)
             await msg.delete()
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -176,7 +176,7 @@ async def chat_handler(message: types.Message):
         stage = await get_tales_field(tale_num, 'cur_stage')
         
         if(stage >= size):
-            msg = await message.answer("Твоя сказка подошла к концу!\nТы можешь закончить эту сказку и начать новую!")
+            msg = await message.answer("Твоя сказка подошла к концу!\nТы можешь закончить эту сказку и начать новую!", parse_mode="Markdown")
             await asyncio.sleep(3)
             await msg.delete()
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -189,7 +189,7 @@ async def chat_handler(message: types.Message):
         prompt = await get_prompt(message.text, user_id, tale_num)
         print(f"prompt = {prompt}")
         await add_data_to_tale(tale_num, prompt, size)
-        msg = await message.answer(await get_stub_message())
+        msg = await message.answer(await get_stub_message(), parse_mode="Markdown")
         response = await client.chat.completions.create(
             model="deepseek-chat",
             messages=await get_user_context_tale(tale_num, size),

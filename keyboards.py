@@ -59,9 +59,9 @@ tale_end_keyboard = InlineKeyboardMarkup(
 
 size_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="🐇 5 миинут",              callback_data="tiny tale")],
-        [InlineKeyboardButton(text="🦔 10 миинут",              callback_data="small tale")],
-        [InlineKeyboardButton(text="🐌 20 миинут",             callback_data="medium tale")],
+        [InlineKeyboardButton(text="🐇 5 минут",              callback_data="tiny tale")],
+        [InlineKeyboardButton(text="🦔 10 минут",              callback_data="small tale")],
+        [InlineKeyboardButton(text="🐌 20 минут",             callback_data="medium tale")],
         #[InlineKeyboardButton(text="🐌 20 минут",              callback_data="large tale")],
     ]
 )

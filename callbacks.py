@@ -31,8 +31,7 @@ async def continue_tale_handler(callback: CallbackQuery):
     except:
         print("Удаление в callback не удалось")
 
-    hero = await get_tales_field(cur_tale, "hero") or "ПРОДОЛЖЕНИЕ"
-    await callback.message.answer(f"========[{hero}]========\n", parse_mode="Markdown")
+    await callback.message.answer( "\u00A0" * 19 + "🎉 *Продолжение* 🎉" + "\u00A0" * 14, parse_mode="Markdown")
     for part in parts[:-1]:
         await callback.message.answer(part, parse_mode="Markdown")
     await update_user_field(user_id, 'menu', "tale_menu")

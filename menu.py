@@ -171,8 +171,7 @@ async def button_hendler(user_id: int, button: str):
         await print_table("tales")
         await print_table("small_tale")
         if(button == "create"):
-            hero = await get_tales_field(tale_num, "hero") or "НОВАЯ СКАЗКА"
-            return f"========[{hero}]========\n" + bot_response
+            return "\u00A0" * 22 + "🎉 *Новая сказка* 🎉\n"  + bot_response
         else:
             return bot_response
 

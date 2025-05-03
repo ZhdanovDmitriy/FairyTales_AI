@@ -2,7 +2,7 @@ from config import get_async_connection
 from typing import Any, Optional
 import asyncio
 
-allowed_fields = {"users": {"sex", "age", "hobby", "menu", "name", "last_message", "cur_tale"},
+allowed_fields = {"users": {"sex", "age", "hobby", "menu", "name", "last_message", "cur_tale", "process"},
                   "tales": {"tale_size", "cur_stage", "genre", "hero", "moral"}}
 
 table_map = {
@@ -390,7 +390,6 @@ async def add_user(user_id: int, sex: str, age: int, hobby: str, menu: int, name
 
     :return: None или return_fail_value
     """
-
     print(f"[DEBUG] Начало add_user(user_id={user_id}, name={name})")
     
     conn = None
@@ -402,22 +401,22 @@ async def add_user(user_id: int, sex: str, age: int, hobby: str, menu: int, name
         
         async with conn.cursor() as cursor:
             query = """
-                INSERT INTO users (user_id, sex, age, hobby, menu, name, last_message, cur_tale)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO users (user_id, sex, age, hobby, menu, name, last_message, cur_tale, process)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE 
-                    sex=%s, age=%s, hobby=%s, menu=%s, name=%s, last_message=%s, cur_tale=%s
+                    sex=%s, age=%s, hobby=%s, menu=%s, name=%s, last_message=%s, cur_tale=%s, process=%s
             """
             print(f"[DEBUG] Выполнение запроса: {query}")
             
             await cursor.execute(query, (
-                user_id, sex, age, hobby, menu, name, last_message, cur_tale,
-                sex, age, hobby, menu, name, last_message, cur_tale
+                user_id, sex, age, hobby, menu, name, last_message, cur_tale, "no",
+                sex, age, hobby, menu, name, last_message, cur_tale, "no"
             ))
             await conn.commit()
-            print(f"[DEBUG] Данные пользователя {user_id} успешно обновлены")
+            print(f"[DEBUG] Данные пользователя {user_id} успешно добавлены или обновлены")
 
     except Exception as e:
-        print(f"[ERROR] Ошибка при обновлении пользователя {user_id}: {str(e)}")
+        print(f"[ERROR] Ошибка при добавлении/обновлении пользователя {user_id}: {str(e)}")
         return return_fail_value
 
     finally:
@@ -427,6 +426,7 @@ async def add_user(user_id: int, sex: str, age: int, hobby: str, menu: int, name
                 print("[DEBUG] Соединение с БД закрыто")
             except Exception as e:
                 print(f"[WARNING] Ошибка при закрытии соединения: {str(e)}")
+
 
 async def add_tale_if_not(tale_num: int, tale_size: int) -> Optional[str]:
     """
@@ -782,6 +782,39 @@ async def print_table(table_name: str) -> Optional[str]:
 
     except Exception as e:
         print(f"[ERROR] Ошибка при выводе таблицы {table_name}: {str(e)}")
+        return return_fail_value
+
+    finally:
+        if conn:
+            try:
+                conn.close()
+                print("[DEBUG] Соединение с БД закрыто")
+            except Exception as e:
+                print(f"[WARNING] Ошибка при закрытии соединения: {str(e)}")
+
+async def reset_all_process_values() -> Optional[str]:
+    """
+    Устанавливает значение 'no' в поле process для всех пользователей.
+    :return: None или return_fail_value
+    """
+    print("[DEBUG] Начало reset_all_process_values()")
+    conn = None
+    try:
+        conn = await get_async_connection()
+        if not conn:
+            print("[ERROR] Не удалось установить соединение с БД")
+            return return_fail_value
+
+        async with conn.cursor() as cursor:
+            query = "UPDATE users SET process = 'no'"
+            print(f"[DEBUG] Выполнение запроса: {query}")
+
+            await cursor.execute(query)
+            await conn.commit()
+            print("[DEBUG] Поле process для всех пользователей успешно обновлено")
+
+    except Exception as e:
+        print(f"[ERROR] Ошибка при обновлении поля process: {str(e)}")
         return return_fail_value
 
     finally:

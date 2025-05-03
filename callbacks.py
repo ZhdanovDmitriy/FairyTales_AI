@@ -11,6 +11,12 @@ from logger import log_event, get_db_state
 @router.callback_query(F.data == "continue tale")
 async def continue_tale_handler(callback: CallbackQuery):
     user_id = callback.from_user.id
+    
+    if await get_user_field(user_id, "process") == "yes":
+        await callback.answer("Подожди немного, осталось чуть-чуть!☄️")
+        print(f"[EXCEPT] Пользователь {user_id} попытался нажать кнопку во время генерации сказки")
+        return
+
     cur_tale = await get_user_field(user_id, "cur_tale")
     size = await get_tales_field(cur_tale, "tale_size")
     cur_stage = await get_tales_field(cur_tale, "cur_stage")
@@ -47,6 +53,12 @@ async def continue_tale_handler(callback: CallbackQuery):
 @router.callback_query()
 async def process_callback(callback: CallbackQuery):
     user_id = callback.from_user.id
+
+    if await get_user_field(user_id, "process") == "yes":
+        await callback.answer("Подожди немного, осталось чуть-чуть!☄️")
+        print(f"[EXCEPT] Пользователь {user_id} попытался нажать кнопку во время генерации сказки")
+        return
+    
     button_text = callback.data
     
     # Логируем нажатие кнопки
@@ -64,12 +76,8 @@ async def process_callback(callback: CallbackQuery):
     button_hendler_text = await button_hendler(user_id, button_text)
     
     cur_stage = await get_tales_field(await get_user_field(user_id, "cur_tale") or 0, "cur_stage") or 0
-    print(cur_stage)
     tale_size = await get_tales_field(await get_user_field(user_id, "cur_tale") or 0, "tale_size") or 0
-    print(tale_size)
     menu_lvl = await get_new_menu_lvl(button_text, cur_stage, tale_size)
-    print(menu_lvl)
-    print(f"menu_lvl : {menu_lvl}")
     await update_user_field(user_id, 'menu', menu_lvl)
 
     if button_text == "Idkt" or button_text == "create":

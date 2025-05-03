@@ -65,7 +65,8 @@ async def get_db_state(user_id: int) -> dict:
             "menu": await get_user_field(user_id, "menu"),
             "sex": await get_user_field(user_id, "sex"),
             "cur_tale": await get_user_field(user_id, "cur_tale"),
-            "last_message": await get_user_field(user_id, "last_message")
+            "last_message": await get_user_field(user_id, "last_message"),
+            "process": await get_user_field(user_id, "process")
         }
 
         tale_num = await get_tales_num(user_id)

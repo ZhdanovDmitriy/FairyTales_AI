@@ -147,17 +147,22 @@ async def button_hendler(user_id: int, button: str):
         await update_tales_field(await get_user_field(user_id, "cur_tale"), "moral", "Случайная")
 
     if(button == "Idkt" or button == "create"):
+        await update_user_field(user_id, 'process', "yes")
         tale_num = await get_user_field(user_id, "cur_tale")
         size = await get_tales_field(tale_num, "tale_size")
         if(await get_tales_field(tale_num, "cur_stage") == None):
             await update_tales_field(tale_num, 'cur_stage', 0)
         await add_tale_if_not(tale_num, size)
-        stage = await get_tales_field(tale_num, 'cur_stage') + 1
-        print(f"stage = {stage}")
+        stage = await get_tales_field(tale_num, 'cur_stage')
+
+        if(stage >= size):
+            await update_user_field(user_id, 'process', "no")
+            return "Твоя сказка подошла к концу!\nТы можешь закончить эту сказку и начать новую!"
+        
+        stage = stage + 1
         await update_tales_field(tale_num, 'cur_stage', stage)
 
         prompt = await get_prompt("Придумай сам, что-нибудь интересное.",user_id, tale_num);
-        print(f"prompt = {prompt}")
         await add_data_to_tale(tale_num, prompt, size)
         response = await client.chat.completions.create(
             model="deepseek-chat",
@@ -170,6 +175,7 @@ async def button_hendler(user_id: int, button: str):
         await add_data_to_tale(tale_num, bot_response, size)
         await print_table("tales")
         await print_table("small_tale")
+        await update_user_field(user_id, 'process', "no")
         if(button == "create"):
             return "\u00A0" * 22 + "🎉 *Новая сказка* 🎉\n"  + bot_response
         else:

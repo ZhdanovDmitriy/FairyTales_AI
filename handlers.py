@@ -3,7 +3,7 @@ from aiogram import types
 from aiogram.filters import Command
 from aiogram.types import Message
 from dbtools import add_user, update_user_field, get_user_field, add_tale_if_not, \
-    add_data_to_tale, get_tales_field,  update_tales_field, print_table, get_user_context_tale
+    add_data_to_tale, get_tales_field,  update_tales_field, print_table, get_user_context_tale, is_user_exists
 from config import START_MESSAGE, TEMPERATURE, client, bot, dp, LINK
 from prompts import get_prompt, get_stub_message
 from menu import get_menu_text, get_menu_keyboard
@@ -16,6 +16,15 @@ clean_pattern = re.compile(r'[^a-zA-Zа-яА-ЯёЁ0-9 .,;:\'\"\-?/]+')
 @dp.message()
 async def chat_handler(message: types.Message):
     user_id = message.from_user.id
+
+    if(not await is_user_exists(user_id)):
+        await add_user(user_id, "не указано", None, "не указано", None, "не указано", message.message_id)#Добавляет нового пользователя и сбрасывает все параметры по умолчанию
+        await message.answer_photo(types.FSInputFile("source/Start_image.jpg"), caption=START_MESSAGE, reply_markup=main_menu_keyboard)
+        await update_user_field(user_id, 'menu', "main_menu")
+
+        # Логируем реакцию бота
+        await log_event(user_id, "отправлено сообщение до внесения в бд", "Отправлено стартовое сообщение", await get_db_state(user_id))
+        return 
     
     if message.text == None:
         await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)

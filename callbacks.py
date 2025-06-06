@@ -1,16 +1,25 @@
 from aiogram.types import CallbackQuery, FSInputFile
+from aiogram import types
 from dbtools import get_user_field, update_user_field
 from config import bot, router, START_MESSAGE, LINK
 from aiogram import F
 from menu import get_new_menu_lvl, get_menu_text, get_menu_keyboard,button_hendler
-from dbtools import get_tales_field, get_user_field, get_parts_tale
-from keyboards import tale_end_keyboard
+from dbtools import get_tales_field, get_user_field, get_parts_tale, is_user_exists, add_user
+from keyboards import tale_end_keyboard, main_menu_keyboard
 from prompts import get_stub_message
 from logger import log_event, get_db_state
 
 @router.callback_query(F.data == "continue tale")
 async def continue_tale_handler(callback: CallbackQuery):
     user_id = callback.from_user.id
+
+    if(not await is_user_exists(user_id)):
+        await add_user(user_id, "не указано", None, "не указано", None, "не указано", callback.message.message_id)#Добавляет нового пользователя и сбрасывает все параметры по умолчанию
+        await callback.message.answer_photo(types.FSInputFile("source/Start_image.jpg"), caption=START_MESSAGE, reply_markup=main_menu_keyboard)
+        await update_user_field(user_id, 'menu', "main_menu")
+
+        await log_event(user_id, "нажата кнопка до внесения в бд", "Отправлено стартовое сообщение", await get_db_state(user_id))
+        return
     
     if await get_user_field(user_id, "process") == "yes":
         await callback.answer("Подожди немного, осталось чуть-чуть!☄️")
@@ -53,6 +62,14 @@ async def continue_tale_handler(callback: CallbackQuery):
 @router.callback_query()
 async def process_callback(callback: CallbackQuery):
     user_id = callback.from_user.id
+
+    if(not await is_user_exists(user_id)):
+        await add_user(user_id, "не указано", None, "не указано", None, "не указано", callback.message.message_id)#Добавляет нового пользователя и сбрасывает все параметры по умолчанию
+        await callback.message.answer_photo(types.FSInputFile("source/Start_image.jpg"), caption=START_MESSAGE, reply_markup=main_menu_keyboard)
+        await update_user_field(user_id, 'menu', "main_menu")
+
+        await log_event(user_id, "нажата кнопка до внесения в бд", "Отправлено стартовое сообщение", await get_db_state(user_id))
+        return
 
     if await get_user_field(user_id, "process") == "yes":
         await callback.answer("Подожди немного, осталось чуть-чуть!☄️")

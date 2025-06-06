@@ -14,6 +14,43 @@ table_map = {
 
 return_fail_value = "Запрос не завершен"
 
+async def is_user_exists(user_id: int) -> bool:
+    """
+    Проверяет, существует ли пользователь с given user_id в таблице 'users'.
+
+    :param user_id: Telegram user ID
+    :return: True, если пользователь найден; False в остальных случаях (не найден или ошибка)
+    """
+    sql = "SELECT 1 FROM users WHERE user_id = %s;"
+
+    conn = None
+    try:
+        conn = await get_async_connection()
+        if not conn:
+            print("[ERROR] Не удалось установить соединение с БД")
+            return False
+
+        async with conn.cursor() as cursor:
+            print(f"[DEBUG] Выполнение запроса: {sql} с user_id={user_id}")
+            await cursor.execute(sql, (user_id,))
+            row = await cursor.fetchone()
+            exists = bool(row)
+            print(f"[DEBUG] Пользователь {'найден' if exists else 'не найден'}")
+            return exists
+
+    except Exception as e:
+        print(f"[ERROR] Ошибка при проверке существования user_id={user_id}: {e}")
+        return False
+
+    finally:
+        if conn:
+            try:
+                conn.close()
+                print("[DEBUG] Соединение с базой данных закрыто")
+            except Exception as close_error:
+                print(f"[WARNING] Ошибка при закрытии соединения: {close_error}")
+
+
 async def get_user_field(user_id: int, field_name: str) -> Optional[Any]:
     """
     Получает значение указанного поля из таблицы 'users' по user_id.
